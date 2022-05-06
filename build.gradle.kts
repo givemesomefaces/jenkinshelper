@@ -21,7 +21,18 @@ version = properties("pluginVersion")
 
 // Configure project's dependencies
 repositories {
+    maven {
+        setUrl("https://maven.aliyun.com/nexus/content/groups/public/")
+    }
+    maven {
+        setUrl("https://maven.aliyun.com/nexus/content/groups/center/")
+    }
     mavenCentral()
+}
+
+dependencies {
+    implementation("cn.hutool:hutool-all:5.7.7")
+    implementation("io.github.cdancy:jenkins-rest:1.0.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
