@@ -1,9 +1,9 @@
-package com.github.lvlifeng.jenkinshelper.listeners
+package com.lvlifeng.jenkinshelper.listeners
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
-import com.github.lvlifeng.jenkinshelper.services.MyProjectService
+import com.lvlifeng.jenkinshelper.services.MyProjectService
 
 internal class MyProjectManagerListener : ProjectManagerListener {
 
