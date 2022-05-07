@@ -7,12 +7,13 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.lvlifeng.jenkinshelper.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.lvlifeng.jenkinshelper.services.MyProjectService"/>
+        <applicationService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyApplicationService"/>
+        <projectService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyProjectService"/>
+        <toolWindow factoryClass="com.lvlifeng.jenkinshelper.window.JenkinsHelperFactory" id="JenkinsHelper" anchor="bottom" />
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.lvlifeng.jenkinshelper.listeners.MyProjectManagerListener"
+        <listener class="com.lvlifeng.jenkinshelper.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 </idea-plugin>

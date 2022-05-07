@@ -1,6 +1,6 @@
-package com.github.lvlifeng.jenkinshelper.services
+package com.lvlifeng.jenkinshelper.services
 
-import com.github.lvlifeng.jenkinshelper.MyBundle
+import com.lvlifeng.jenkinshelper.MyBundle
 
 class MyApplicationService {
 

@@ -1,4 +1,4 @@
-package com.github.lvlifeng.jenkinshelper
+package com.lvlifeng.jenkinshelper
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
