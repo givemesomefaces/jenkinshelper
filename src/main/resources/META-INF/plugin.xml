@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.lvlifeng.jenkinshelper</id>
+    <id>com.lvlifeng.jenkinshelper</id>
     <name>JenkinsHelper</name>
     <vendor url="https://github.com/Lv-Lifeng">Lv Lifeng</vendor>
 
@@ -10,6 +10,7 @@
         <applicationService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyProjectService"/>
         <toolWindow factoryClass="com.lvlifeng.jenkinshelper.window.JenkinsHelperFactory" id="JenkinsHelper" anchor="bottom" />
+        <applicationService serviceInterface="com.lvlifeng.jenkinshelper.jenkins.AccountState" serviceImplementation="com.lvlifeng.jenkinshelper.jenkins.AccountState"/>
     </extensions>
 
     <applicationListeners>
