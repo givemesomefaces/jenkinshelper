@@ -11,7 +11,7 @@ class JenkinsHelperFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val jenkinsHelperWindow = JenkinsHelperWindow(project)
         val contentFactory = ContentFactory.SERVICE.getInstance()
-        val content = contentFactory.createContent(jenkinsHelperWindow.getJenkinsHelperPanel(), "", false)
+        val content = contentFactory.createContent(jenkinsHelperWindow.component, "", false)
         toolWindow.contentManager.addContent(content)
     }
 }
