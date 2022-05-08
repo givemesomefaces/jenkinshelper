@@ -15,7 +15,7 @@
           </grid>
         </constraints>
         <properties/>
-        <border type="none"/>
+        <border type="empty"/>
         <children>
           <grid id="b2678" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
@@ -70,48 +70,45 @@
                     <preferred-size width="200" height="200"/>
                   </grid>
                 </constraints>
-                <properties/>
-                <border type="none"/>
+                <properties>
+                  <dividerLocation value="218"/>
+                </properties>
+                <border type="etched"/>
                 <children>
-                  <grid id="ec23b" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
+                  <scrollpane id="9a809">
                     <constraints>
                       <splitpane position="left"/>
                     </constraints>
-                    <properties/>
-                    <border type="none"/>
+                    <properties>
+                      <enabled value="true"/>
+                      <focusable value="false"/>
+                    </properties>
+                    <border type="empty"/>
                     <children>
-                      <component id="fe6c8" class="javax.swing.JList" binding="jobList">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="50"/>
-                          </grid>
-                        </constraints>
-                        <properties/>
+                      <component id="102e9" class="javax.swing.JList" binding="jobList">
+                        <constraints/>
+                        <properties>
+                          <selectionMode value="0"/>
+                        </properties>
                       </component>
                     </children>
-                  </grid>
-                  <grid id="4c244" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                    <margin top="0" left="0" bottom="0" right="0"/>
+                  </scrollpane>
+                  <scrollpane id="e57ab">
                     <constraints>
                       <splitpane position="right"/>
                     </constraints>
                     <properties/>
-                    <border type="none"/>
+                    <border type="empty"/>
                     <children>
-                      <component id="efe28" class="javax.swing.JList" binding="selectedJobList">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="50"/>
-                          </grid>
-                        </constraints>
+                      <component id="4ef18" class="javax.swing.JList" binding="selectedJobList">
+                        <constraints/>
                         <properties/>
                       </component>
                     </children>
-                  </grid>
+                  </scrollpane>
                 </children>
               </splitpane>
-              <grid id="e3e87" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="e3e87" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -154,14 +151,6 @@
                     </constraints>
                     <properties>
                       <text value="Error log"/>
-                    </properties>
-                  </component>
-                  <component id="7185a" class="javax.swing.JButton" binding="stopRebuildButton" default-binding="true">
-                    <constraints>
-                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text value="Stop rebuild"/>
                     </properties>
                   </component>
                 </children>

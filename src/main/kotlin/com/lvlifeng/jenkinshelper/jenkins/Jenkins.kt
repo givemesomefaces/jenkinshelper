@@ -1,6 +1,8 @@
 package com.lvlifeng.jenkinshelper.jenkins
 
-import com.cdancy.jenkins.rest.JenkinsClient
+import com.offbytwo.jenkins.JenkinsServer
+import java.net.URI
+import java.net.URISyntaxException
 
 /**
  *
@@ -8,7 +10,7 @@ import com.cdancy.jenkins.rest.JenkinsClient
  * @author Lv Lifeng
  * @date 2022-05-08 10:27
  */
-class Jenkins constructor(){
+class Jenkins constructor() {
 
     var nickName: String? = null
         get() = field
@@ -40,12 +42,18 @@ class Jenkins constructor(){
     }
 
 
-    fun client(jk: Jenkins): JenkinsClient {
-        Jenkins
-        return JenkinsClient.builder()
-            .endPoint(jk.apiUrl)
-            .credentials("${jk.userName}:${jk.password}")
-            .build()
+    fun server(jk: Jenkins): JenkinsServer {
+        var jenkinsServer: JenkinsServer? = null
+        try {
+            jenkinsServer = JenkinsServer(
+                URI(jk.apiUrl),
+                jk.userName,
+                jk.password
+            )
+        } catch (e: URISyntaxException) {
+            e.printStackTrace()
+        }
+        return jenkinsServer!!
     }
 
     override fun equals(other: Any?): Boolean {

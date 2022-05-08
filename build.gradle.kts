@@ -32,7 +32,9 @@ repositories {
 
 dependencies {
     implementation("cn.hutool:hutool-all:5.7.7")
-    implementation("io.github.cdancy:jenkins-rest:1.0.0")
+    implementation("com.offbytwo.jenkins:jenkins-client:0.3.8")
+    implementation("org.slf4j:slf4j-log4j12:1.7.5")
+//    implementation("io.github.cdancy:jenkins-rest:1.0.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
