@@ -29,11 +29,13 @@ public class AccountDialog extends DialogWrapper {
     private JButton editButton;
     private AccountState ac = AccountState.Companion.getInstance();
     private Project project = null;
+    private Component jenkinsHelperComponent;
 
 
     protected AccountDialog(@Nullable Project project, @Nullable Component parentComponent) {
         super(project, parentComponent, false, IdeModalityType.PROJECT);
         this.project = project;
+        this.jenkinsHelperComponent = parentComponent;
         init();
         initButton();
         setUp();
@@ -45,7 +47,8 @@ public class AccountDialog extends DialogWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                new AddAccountDialog(rootPanel, false, null).show();
+                new AddAccountDialog(rootPanel, jenkinsHelperComponent, false, null).show();
+                fill();
             }
         });
         deleteButton.addMouseListener(new MouseAdapter() {
@@ -67,7 +70,7 @@ public class AccountDialog extends DialogWrapper {
                 if (jk == null) {
                     return;
                 }
-                new AddAccountDialog(rootPanel, false, jk).show();
+                new AddAccountDialog(rootPanel, jenkinsHelperComponent, false, jk).show();
                 fill();
             }
         });
@@ -117,6 +120,8 @@ public class AccountDialog extends DialogWrapper {
             }
         });
         initButton();
+        jenkinsHelperComponent.getParent().repaint();
+        jenkinsHelperComponent.getParent().revalidate();
     }
 
     @Override
