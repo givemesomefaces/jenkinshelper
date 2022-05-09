@@ -1,14 +1,16 @@
-package com.lvlifeng.jenkinshelper;
+package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.WindowWrapper;
+import com.lvlifeng.jenkinshelper.bean.BuildConfig;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.helper.JenkinsVersion;
 import com.offbytwo.jenkins.model.Job;
+import com.offbytwo.jenkins.model.JobWithDetails;
 import com.offbytwo.jenkins.model.View;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +43,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private JLabel selectedLable;
     private JButton accountButton;
     private JLabel errorInfoLable;
+    private JButton stopRebuildButton;
 
     private AccountState ac = AccountState.Companion.getInstance();
     private static JenkinsServer jk = null;
@@ -48,6 +51,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private Map<String, View> views;
     private List<Job> selectedJobs = new ArrayList<>();
     private List<Job> allJobs = new ArrayList<>();
+    private boolean rebuildFlag = false;
 
 
     public JenkinsHelperWindow(Project project) {
@@ -60,8 +64,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
 //        SystemInfo systemInfo = jk.api().systemApi().systemInfo();
 //        assertTrue(systemInfo.jenkinsVersion().equals("1.642.4"));
 
-        rootPanel.addComponentListener(new ComponentAdapter() {
-        });
     }
 
     private void initUi() {
@@ -69,6 +71,95 @@ public class JenkinsHelperWindow implements WindowWrapper {
         initJobList();
         initSelectedJobList();
         initCheckAllButton();
+        initBuildAndRebuildButton();
+        initUpdateButton();
+        initAddParamsButton();
+        initErrorLogButton();
+    }
+
+    private void initErrorLogButton() {
+
+    }
+
+    private void initAddParamsButton() {
+
+    }
+
+    private void initUpdateButton() {
+
+    }
+
+    private void initBuildAndRebuildButton() {
+        stopRebuildButton.setEnabled(false);
+        stopRebuildButton.setVisible(false);
+        buildButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                BuildJobDialog buildJobDialog = new BuildJobDialog(project, rootPanel);
+                buildJobDialog.show();
+                if (buildJobDialog.isOK()) {
+                    BuildConfig buildConfig = buildJobDialog.getBuildConfig();
+                    rebuildFlag = buildConfig.getReBuildFlag();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            do {
+                                doBuild(buildConfig);
+                            } while (rebuildFlag);
+                        }
+                    }).start();
+                    if (rebuildFlag) {
+                        buildButton.setEnabled(false);
+                        buildButton.setVisible(false);
+                        stopRebuildButton.setEnabled(true);
+                        stopRebuildButton.setVisible(true);
+                    }
+                }
+            }
+        });
+        stopRebuildButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                rebuildFlag = false;
+                buildButton.setEnabled(true);
+                buildButton.setVisible(true);
+                stopRebuildButton.setEnabled(false);
+                stopRebuildButton.setVisible(false);
+            }
+        });
+    }
+
+    private void doBuild(BuildConfig buildConfig) {
+        selectedJobs.stream().forEach(job -> {
+            try {
+                if (buildConfig.getBuildLastFailedFlag()) {
+                    JobWithDetails details = job.details();
+                    if (details.getLastBuild().getNumber() != details.getLastFailedBuild().getNumber()) {
+                        return;
+                    }
+                    if (details.getQueueItem() != null && details.getLastCompletedBuild().getNumber() == details.getLastBuild().getNumber()) {
+                        return;
+                    }
+                }
+                if (MapUtil.isNotEmpty(buildConfig.getParamesMap())) {
+                    job.build(buildConfig.getParamesMap(), true);
+                } else {
+                    job.build(true);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        if (rebuildFlag) {
+            try {
+                Thread.sleep(buildConfig.getReBuildTime() * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private void initCheckAllButton() {
@@ -182,14 +273,16 @@ public class JenkinsHelperWindow implements WindowWrapper {
             }
         });
         try {
-            views = jk.getViews();
-            if (MapUtil.isEmpty(views)) {
-                return;
+            if (null != jk) {
+                views = jk.getViews();
+                if (MapUtil.isEmpty(views)) {
+                    return;
+                }
+                viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
+                viewList.setSelectedIndex(views.size() - 1);
+                View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
+                setJobListByView(view);
             }
-            viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
-            viewList.setSelectedIndex(views.size() - 1);
-            View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
-            setJobListByView(view);
         } catch (IOException e) {
             e.printStackTrace();
         }

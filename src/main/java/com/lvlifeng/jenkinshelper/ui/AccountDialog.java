@@ -1,4 +1,4 @@
-package com.lvlifeng.jenkinshelper;
+package com.lvlifeng.jenkinshelper.ui;
 
 import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.project.Project;

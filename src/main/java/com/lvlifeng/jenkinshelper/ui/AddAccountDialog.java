@@ -1,4 +1,4 @@
-package com.lvlifeng.jenkinshelper;
+package com.lvlifeng.jenkinshelper.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;

@@ -9,8 +9,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 /**
  *
  *
- * @author Lv LiFeng
- * @date 2022/1/7 00:13
+ * @author Lv Lifeng
+ * @date 2022-05-08 03:30
  */
 @State(name = "AccountState", storages = [Storage("\$APP_CONFIG$/jenkins-helper-settings-persistentstate.xml")])
 class AccountState : PersistentStateComponent<AccountState?> {
