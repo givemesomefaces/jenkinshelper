@@ -5,6 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.WindowWrapper;
 import com.lvlifeng.jenkinshelper.bean.BuildConfig;
+import com.lvlifeng.jenkinshelper.bean.UpdateConfig;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
@@ -14,14 +15,22 @@ import com.offbytwo.jenkins.model.JobWithDetails;
 import com.offbytwo.jenkins.model.View;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.swing.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * @author Lv Lifeng
@@ -86,7 +95,44 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void initUpdateButton() {
+        updateButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                UpdateJobDialog updateJobDialog = new UpdateJobDialog(project, rootPanel);
+                updateJobDialog.show();
+                if (updateJobDialog.isOK()) {
+                    UpdateConfig updateConfig = updateJobDialog.getUpdateConfig();
+                    doUpdate(updateConfig);
+                }
+            }
+        });
+    }
 
+    private void doUpdate(UpdateConfig updateConfig) {
+        selectedJobs.stream().forEach(job -> {
+            try {
+                updateConfig.getNewGitBranchName();
+                String jobXml = jk.getJobXml(job.getName());
+                System.out.println(jobXml);
+//                Document document = DocumentHelper.parseText(jobXml);
+//                getElementsByTagName("hudson.plugins.git.BranchSpec")
+                InputSource is = new InputSource(new StringReader(jobXml));
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(is);
+                NodeList brancheList = doc.getElementsByTagName("hudson.plugins.git.BranchSpec");
+                for (int i = 0; i < brancheList.getLength(); i++) {
+                    Node item = brancheList.item(i);
+                }
+//                for branch in branches:
+//                name = branch.getElementsByTagName('name')[0]
+//                name.childNodes[0].data = new_branch
+//                update = True
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void initBuildAndRebuildButton() {
