@@ -13,21 +13,17 @@ import com.offbytwo.jenkins.helper.JenkinsVersion;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.JobWithDetails;
 import com.offbytwo.jenkins.model.View;
+import org.apache.commons.lang.StringUtils;
+import org.dom4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import javax.swing.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +57,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private List<Job> selectedJobs = new ArrayList<>();
     private List<Job> allJobs = new ArrayList<>();
     private boolean rebuildFlag = false;
-
+    private static final String XML_SUFFIX = "\n\t\t\t\t\n    \n\t\t\t\t";
 
     public JenkinsHelperWindow(Project project) {
         this.project = project;
@@ -110,25 +106,87 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doUpdate(UpdateConfig updateConfig) {
+        String newGitBranchName = updateConfig.getNewGitBranchName().trim();
+        String newBranchXml = "<hudson.plugins.git.BranchSpec>" + XML_SUFFIX
+                + "<name>" + newGitBranchName + "</name>" + XML_SUFFIX
+                + "</hudson.plugins.git.BranchSpec>";
+        HashMap<String, String> stringParamsMap = updateConfig.getStringParamsMap();
         selectedJobs.stream().forEach(job -> {
             try {
-                updateConfig.getNewGitBranchName();
                 String jobXml = jk.getJobXml(job.getName());
-                System.out.println(jobXml);
-//                Document document = DocumentHelper.parseText(jobXml);
-//                getElementsByTagName("hudson.plugins.git.BranchSpec")
-                InputSource is = new InputSource(new StringReader(jobXml));
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(is);
-                NodeList brancheList = doc.getElementsByTagName("hudson.plugins.git.BranchSpec");
-                for (int i = 0; i < brancheList.getLength(); i++) {
-                    Node item = brancheList.item(i);
+                Document document = DocumentHelper.parseText(jobXml);
+                Element rootElement = document.getRootElement();
+                if (StringUtils.isNotBlank(newGitBranchName)) {
+                    List<Node> nodes = rootElement.selectNodes("//hudson.plugins.git.BranchSpec");
+                    if (CollectionUtil.isNotEmpty(nodes)) {
+                        nodes.get(0).setDocument(DocumentHelper.parseText(newBranchXml));
+                    }
                 }
+                if (MapUtil.isNotEmpty(stringParamsMap)) {
+                    List<Node> nodes = rootElement.selectNodes("//properties/hudson.model.ParametersDefinitionProperty/parameterDefinitions/hudson.model.StringParameterDefinition");
+                    if (CollectionUtil.isNotEmpty(nodes)) {
+                        nodes.stream().forEach(node -> {
+                            Element parent = node.getParent();
+                            List<Element> elements = parent.elements();
+                            if (CollectionUtil.isNotEmpty(elements)) {
+                                elements.forEach(element -> {
+//                                    parent.elements().get(0).elements().get(0).getName()
+                                    Element stringParameterDefinition = parent.elements().get(0);
+                                    if (stringParameterDefinition != null) {
+                                        List<Element> childElements = stringParameterDefinition.elements();
+                                        if (childElements.stream().anyMatch(child -> StringUtils.equals(child.getName(), "name") && stringParamsMap.keySet().contains(child.getData()))) {
+                                            if (childElements.stream().noneMatch(child -> StringUtils.equals(child.getName(), "defaultValue"))) {
+                                                String defaultValueStr = "<defaultValue>" + stringParamsMap.get(element.getName()) + "</defaultValue>";
+                                                Document defaultValueDocument = null;
+                                                try {
+                                                    defaultValueDocument = DocumentHelper.parseText(defaultValueStr);
+                                                } catch (DocumentException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                stringParameterDefinition.add(defaultValueDocument.getRootElement());
+                                            } else {
+                                                childElements.forEach(child -> {
+                                                    if (StringUtils.equals(child.getName(), "defaultValue")) {
+                                                        child.setData(stringParamsMap.get(element.getName()));
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+
+                                });
+                            }
+                            System.out.println("");
+                        });
+                    }
+                }
+
+                //<hudson.plugins.git.BranchSpec>
+                //
+                //
+                //				<name>baseline_v2.4.8_20220425</name>
+                //
+                //
+                //			</hudson.plugins.git.BranchSpec>
+
+//                List<Element> elements = rootElement.elements("hudson.model.StringParameterDefinition");
+//                Iterator<Element> elementIterator = rootElement.elementIterator("hudson.model.StringParameterDefinition");
+                String xmlStr = rootElement.asXML();
+                System.out.println(jobXml);
+//                getElementsByTagName("hudson.plugins.git.BranchSpec")
+//                InputSource is = new InputSource(new StringReader(jobXml));
+//                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//                DocumentBuilder builder = factory.newDocumentBuilder();
+//                Document doc = builder.parse(is);
+//                NodeList brancheList = doc.getElementsByTagName("hudson.plugins.git.BranchSpec");
+//                for (int i = 0; i < brancheList.getLength(); i++) {
+//                    Node item = brancheList.item(i);
+//                }
 //                for branch in branches:
 //                name = branch.getElementsByTagName('name')[0]
 //                name.childNodes[0].data = new_branch
 //                update = True
+                jk.updateJob(job.getName(), xmlStr, true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
