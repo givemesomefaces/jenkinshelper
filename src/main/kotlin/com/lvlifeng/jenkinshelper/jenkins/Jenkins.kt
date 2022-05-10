@@ -1,8 +1,10 @@
 package com.lvlifeng.jenkinshelper.jenkins
 
 import com.offbytwo.jenkins.JenkinsServer
+import com.offbytwo.jenkins.client.JenkinsHttpClient
 import java.net.URI
 import java.net.URISyntaxException
+
 
 /**
  *
@@ -54,6 +56,16 @@ class Jenkins constructor() {
             e.printStackTrace()
         }
         return jenkinsServer!!
+    }
+
+    fun client(jk: Jenkins): JenkinsHttpClient? {
+        var jenkinsHttpClient: JenkinsHttpClient? = null
+        try {
+            jenkinsHttpClient = JenkinsHttpClient(URI(jk.apiUrl), jk.userName, jk.password)
+        } catch (e: URISyntaxException) {
+            e.printStackTrace()
+        }
+        return jenkinsHttpClient
     }
 
     override fun equals(other: Any?): Boolean {

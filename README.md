@@ -6,17 +6,18 @@
 
 <!-- Plugin description -->
 ### Support batch operation for jenkins job 
-The JenkinsHelper window is at the bottom of the ide.
+The JenkinsHelper window is at the bottom of the ide.  
+can select multiple jobs to operate.
 * build   
-  1. build wit params
-  2. circular build if failed
-  3. build last failed jobs
+  * build with params
+  * circular build if last build was failed 
+  * choose last build failed jobs to build
 * update
-  1. git branch name
-  2. update value of String params
-  3. add new string param
+  * git branch name
+  * update value of string params
+  * add new string param
 * error log
-  1. filter error log
+  * filter error log
 <!-- Plugin description end -->
 
 ## Installation

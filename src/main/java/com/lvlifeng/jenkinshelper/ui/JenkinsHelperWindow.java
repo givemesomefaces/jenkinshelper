@@ -2,6 +2,7 @@ package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.WindowWrapper;
@@ -18,6 +19,7 @@ import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.helper.JenkinsVersion;
+import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.View;
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +30,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,26 +127,37 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void getErrorLog() {
-        selectedJobs.stream().forEach(job -> {
-            StringBuilder errorLogs = new StringBuilder();
-            try {
-                String consoleOutputText = job.details().getLastFailedBuild().details().getConsoleOutputText();
-                if (StringUtils.isBlank(consoleOutputText)) {
-                    return;
+        log(Bundle.message("queryErrorLogs"));
+        try {
+            for (Job job : selectedJobs) {
+                StringBuilder errorLogs = new StringBuilder();
+                Build lastFailedBuild = jk.getJob(job.getName()).getLastFailedBuild();
+                if (lastFailedBuild == null || lastFailedBuild.getNumber() == -1) {
+                    continue;
                 }
-                errorLogs.append(Bundle.message("jobName", job.getName())).append("\r\n");
-                String[] msg = consoleOutputText.split("\r\n");
+                if (!StringUtils.equals(lastFailedBuild.getUrl(), job.getUrl())) {
+                    errorLogs.append(Bundle.message("urlErrorMsg")).append(Bundle.message("enter"));
+                }
+                String consoleOutputText = lastFailedBuild.details().getConsoleOutputText();
+                if (StringUtils.isBlank(consoleOutputText)) {
+                    continue;
+                }
+                errorLogs.append(Bundle.message("jobName", job.getName())).append(Bundle.message("enter"));
+                String[] msg = consoleOutputText.split(Bundle.message("enter"));
                 Arrays.asList(msg).forEach(m -> {
                     if (ERROR_LOG_KEYWORDS.stream().anyMatch(o -> m.toLowerCase().contains(o))) {
-                        errorLogs.append(m).append("\r\n");
+                        errorLogs.append(m).append(Bundle.message("enter"));
                     }
                 });
-                errorLogs.append("\r\n");
-                logTextarea.append(errorLogs.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
+                errorLogs.append(Bundle.message("enter"));
+                Bundle.message(errorLogs.toString());
             }
-        });
+        } catch (UnknownHostException hostException) {
+            log(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
+        } catch (IOException ioException) {
+            log(ioException.getMessage());
+        }
+
 
     }
 
@@ -162,7 +176,10 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doAddStringParams(StringParamsConfig config) {
+        log(Bundle.message("startAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
         selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.addParams(config, jk, job));
+        log(Bundle.message("endAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
+
     }
 
     private void initUpdateButton() {
@@ -180,7 +197,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doUpdate(UpdateConfig updateConfig) {
+        log(Bundle.message("startUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
         selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.updateJobConfig(updateConfig, jk, job));
+        log(Bundle.message("endUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
     }
 
     private void initBuildAndRebuildButton() {
@@ -199,8 +218,10 @@ public class JenkinsHelperWindow implements WindowWrapper {
                         @Override
                         public void run() {
                             do {
+                                log(Bundle.message("startBuild", JSONUtil.toJsonStr(buildConfig)));
                                 doBuild(buildConfig);
                             } while (rebuildFlag);
+                            log(Bundle.message("endBuild", JSONUtil.toJsonStr(buildConfig)));
                         }
                     }).start();
                     if (rebuildFlag) {
@@ -283,7 +304,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
         }
     }
 
-    private List<Job> filterJob(String searchWord){
+    private List<Job> filterJob(String searchWord) {
         return filterJobs = allJobs
                 .stream()
                 .filter(o -> filterJobs(o, searchWord))
@@ -293,7 +314,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private boolean filterJobs(Job o, String searchWord) {
         Set<String> searchJobList = new HashSet<>();
         if (StringUtils.isNotBlank(searchWord)) {
-            searchJobList = Arrays.stream(StringUtils.split(searchWord, Bundle.message("commaSperator"))).collect(Collectors.toSet());
+            searchJobList = Arrays.stream(StringUtils.split(searchWord, Bundle.message("commaSeparator"))).collect(Collectors.toSet());
         }
         return (CollectionUtil.isNotEmpty(searchJobList)
                 && ((searchJobList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchJobList).get(0)))
@@ -361,7 +382,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 Jenkins jenkins = (Jenkins) e.getItem();
-                if (Objects.equals(AccountState.Companion.getDefaultAc(), jenkins)){
+                if (Objects.equals(AccountState.Companion.getDefaultAc(), jenkins)) {
                     return;
                 }
                 accountList.removeItem(AccountState.Companion.getDefaultAc());
@@ -391,6 +412,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
             if (null != jk) {
                 views = jk.getViews();
                 if (MapUtil.isEmpty(views)) {
+                    viewList.setModel(new DefaultComboBoxModel(Lists.newArrayList().toArray()));
+                    initSelectedJobList();
                     return;
                 }
                 viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
@@ -410,6 +433,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
             allJobs = new ArrayList<>();
         }
         selectedJobs = new HashSet<>();
+        selectAllCheckBox.setSelected(false);
+        initSelectedJobList();
         initJobList(filterJob(null));
     }
 
@@ -456,5 +481,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
     @Override
     public void dispose() {
 
+    }
+
+    private void log(String log) {
+        logTextarea.append(log + Bundle.message("enter"));
     }
 }
