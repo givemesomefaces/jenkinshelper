@@ -9,7 +9,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyApplicationService"/>
         <projectService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyProjectService"/>
-        <toolWindow factoryClass="com.lvlifeng.jenkinshelper.window.JenkinsHelperFactory" id="JenkinsHelper" anchor="bottom" />
+        <toolWindow factoryClass="com.lvlifeng.jenkinshelper.window.JenkinsHelperFactory" id="JenkinsHelper" anchor="bottom" icon="/icons/window.svg"/>
         <applicationService serviceInterface="com.lvlifeng.jenkinshelper.jenkins.AccountState" serviceImplementation="com.lvlifeng.jenkinshelper.jenkins.AccountState"/>
     </extensions>
 

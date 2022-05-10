@@ -2,6 +2,7 @@ package com.lvlifeng.jenkinshelper.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.BuildConfig;
 import com.lvlifeng.jenkinshelper.helper.StringParamsParseHelper;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,7 @@ public class BuildJobDialog extends DialogWrapper {
 
     protected BuildJobDialog(@Nullable Project project, JPanel parentPanel) {
         super(project, parentPanel, false, IdeModalityType.IDE);
+        this.setTitle(Bundle.message("buildDialogTitle"));
         init();
         initRebuildCheckBox();
     }
@@ -73,12 +75,7 @@ public class BuildJobDialog extends DialogWrapper {
 
 
     public BuildConfig getBuildConfig() {
-        BuildConfig buildConfig = new BuildConfig();
-        buildConfig.setReBuildFlag(rebuildFlag);
-        buildConfig.setBuildLastFailedFlag(buildLastFailed);
-        buildConfig.setReBuildTime(rebuildTime);
-        buildConfig.setParamesMap(paramsMap);
-        return buildConfig;
+        return new BuildConfig(buildLastFailed, rebuildFlag, rebuildTime, paramsMap);
     }
 
     @Override

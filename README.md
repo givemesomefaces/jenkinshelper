@@ -5,7 +5,18 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
 
 <!-- Plugin description -->
-
+### Support batch operation for jenkins job 
+The JenkinsHelper window is at the bottom of the ide.
+* build   
+  1. build wit params
+  2. circular build if failed
+  3. build last failed jobs
+* update
+  1. git branch name
+  2. update value of String params
+  3. add new string param
+* error log
+  1. filter error log
 <!-- Plugin description end -->
 
 ## Installation

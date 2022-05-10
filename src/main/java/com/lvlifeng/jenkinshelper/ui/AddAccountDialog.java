@@ -2,6 +2,7 @@ package com.lvlifeng.jenkinshelper.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
@@ -32,6 +33,7 @@ public class AddAccountDialog extends DialogWrapper {
 
     protected AddAccountDialog(@NotNull Component parent, Component jenkinsHelperComponent, boolean canBeParent, Jenkins jk) {
         super(parent, canBeParent);
+        this.setTitle(Bundle.message("addAccountDialogTitle"));
         this.jk = jk;
         this.jenkinsHelperComponent = jenkinsHelperComponent;
         setSize(300, 150);

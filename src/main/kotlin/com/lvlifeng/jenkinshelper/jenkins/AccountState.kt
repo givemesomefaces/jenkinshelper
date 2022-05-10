@@ -5,6 +5,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
+import com.lvlifeng.jenkinshelper.Bundle
 
 /**
  *
@@ -46,6 +47,9 @@ class AccountState : PersistentStateComponent<AccountState?> {
     companion object {
         val instance: AccountState
             get() = ServiceManager.getService(AccountState::class.java)
+
+        val defaultAc: Jenkins
+            get() = Jenkins(Bundle.message("defaultAccount"), null, null,null)
     }
 
     override fun getState(): AccountState? {
