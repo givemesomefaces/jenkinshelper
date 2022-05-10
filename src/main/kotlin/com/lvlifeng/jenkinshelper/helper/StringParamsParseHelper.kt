@@ -17,11 +17,11 @@ class StringParamsParseHelper {
             val paramsMap: HashMap<String, String> = HashMap<String, String>()
             if (StringUtils.isNotBlank(paramsStr)) {
                 val paramArr = StringUtils.split(paramsStr, ",，")
-                if (CollectionUtil.isNotEmpty(Arrays.asList(*paramArr))) {
-                    Arrays.asList(*paramArr).stream().forEach { o: String ->
-                        val parames = Arrays.asList(*o.split("=").toTypedArray())
-                        if (CollectionUtil.isNotEmpty(parames)) {
-                            paramsMap.putIfAbsent(parames[0], parames[parames.size - 1])
+                if (CollectionUtil.isNotEmpty(listOf(*paramArr))) {
+                    listOf(*paramArr).stream().forEach { o: String ->
+                        val params = listOf(*o.split("=").toTypedArray())
+                        if (CollectionUtil.isNotEmpty(params)) {
+                            paramsMap.putIfAbsent(params[0], params[params.size - 1])
                         }
                     }
                 }

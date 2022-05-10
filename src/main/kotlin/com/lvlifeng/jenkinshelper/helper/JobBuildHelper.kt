@@ -5,6 +5,8 @@ import com.lvlifeng.jenkinshelper.bean.BuildConfig
 import com.offbytwo.jenkins.JenkinsServer
 import com.offbytwo.jenkins.model.Job
 import com.offbytwo.jenkins.model.JobWithDetails
+import java.io.IOException
+import java.net.UnknownHostException
 
 /**
  *
@@ -25,10 +27,16 @@ class JobBuildHelper {
                     return
                 }
             }
-            if (MapUtil.isNotEmpty(config.paramesMap)) {
-                jb.build(config.paramesMap, true)
-            } else {
-                jb.build(true)
+            try {
+                if (MapUtil.isNotEmpty(config.paramesMap)) {
+                    jb.build(config.paramesMap, true)
+                } else {
+                    jb.build(true)
+                }
+            } catch (unKnow: UnknownHostException) {
+                throw unKnow
+            } catch (io: IOException) {
+                throw io
             }
         }
     }
