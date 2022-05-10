@@ -2,6 +2,7 @@ package com.lvlifeng.jenkinshelper.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.UpdateConfig;
 import com.lvlifeng.jenkinshelper.helper.StringParamsParseHelper;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ public class UpdateJobDialog extends DialogWrapper {
     protected UpdateJobDialog(@Nullable Project project, JPanel parentPanel) {
         super(project, parentPanel, false, IdeModalityType.IDE);
         init();
+        this.setTitle(Bundle.message("updateDialogTitle"));
     }
 
     @Override
@@ -29,9 +31,7 @@ public class UpdateJobDialog extends DialogWrapper {
     }
 
     public UpdateConfig getUpdateConfig() {
-        UpdateConfig updateConfig = new UpdateConfig();
-        updateConfig.setNewGitBranchName(newGitBranchNameTextField.getText());
-        updateConfig.setStringParamsMap(StringParamsParseHelper.Companion.getParamsMap(stringParameTextField.getText()));
-        return updateConfig;
+        return new UpdateConfig(newGitBranchNameTextField.getText(),
+                StringParamsParseHelper.Companion.getParamsMap(stringParameTextField.getText()));
     }
 }

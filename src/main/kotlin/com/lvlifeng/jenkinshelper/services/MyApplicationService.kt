@@ -1,10 +1,10 @@
 package com.lvlifeng.jenkinshelper.services
 
-import com.lvlifeng.jenkinshelper.MyBundle
+import com.lvlifeng.jenkinshelper.Bundle
 
 class MyApplicationService {
 
     init {
-        println(MyBundle.message("applicationService"))
+        println(Bundle.message("applicationService"))
     }
 }

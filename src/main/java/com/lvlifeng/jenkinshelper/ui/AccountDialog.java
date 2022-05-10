@@ -3,6 +3,7 @@ package com.lvlifeng.jenkinshelper.ui;
 import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,7 @@ public class AccountDialog extends DialogWrapper {
         super(project, parentComponent, false, IdeModalityType.PROJECT);
         this.project = project;
         this.jenkinsHelperComponent = parentComponent;
+        this.setTitle(Bundle.message("accountDialogTitle"));
         init();
         initButton();
         setUp();

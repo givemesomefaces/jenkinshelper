@@ -2,19 +2,25 @@ package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
+import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.WindowWrapper;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.awt.RelativePoint;
+import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.BuildConfig;
+import com.lvlifeng.jenkinshelper.bean.Jpopup;
+import com.lvlifeng.jenkinshelper.bean.StringParamsConfig;
 import com.lvlifeng.jenkinshelper.bean.UpdateConfig;
+import com.lvlifeng.jenkinshelper.helper.JobBuildHelper;
+import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.helper.JenkinsVersion;
 import com.offbytwo.jenkins.model.Job;
-import com.offbytwo.jenkins.model.JobWithDetails;
 import com.offbytwo.jenkins.model.View;
 import org.apache.commons.lang.StringUtils;
-import org.dom4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,10 +28,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,7 +40,7 @@ import java.util.Map;
 public class JenkinsHelperWindow implements WindowWrapper {
     private JPanel rootPanel;
     private JComboBox viewList;
-    private JTextField textField1;
+    private JTextField searchField;
     private JCheckBox selectAllCheckBox;
     private JList jobList;
     private JList selectedJobList;
@@ -54,27 +59,29 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private static JenkinsServer jk = null;
     private Project project;
     private Map<String, View> views;
-    private List<Job> selectedJobs = new ArrayList<>();
+    private Set<Job> selectedJobs = new HashSet<>();
     private List<Job> allJobs = new ArrayList<>();
+    private List<Job> filterJobs = new ArrayList<>();
     private boolean rebuildFlag = false;
-    private static final String XML_SUFFIX = "\n\t\t\t\t\n    \n\t\t\t\t";
+    private List<Jenkins> oldAc = Lists.newArrayList(ac.getJks());
+    private static final List<String> ERROR_LOG_KEYWORDS = Lists.newArrayList(
+            "[error]",
+            "as failure",
+            "finished: failure"
+    );
 
     public JenkinsHelperWindow(Project project) {
         this.project = project;
         initUi();
-//        Jenkins jenkins = new Jenkins("cms", "http://jenkins-cms.test.rabbitpre.com/", "admin", "admin@123");
-//        accountList.addItem(jenkins);
-//        ac.addAccount(jenkins);
-//        jk = new Jenkins().client(jenkins);
-//        SystemInfo systemInfo = jk.api().systemApi().systemInfo();
-//        assertTrue(systemInfo.jenkinsVersion().equals("1.642.4"));
 
     }
 
     private void initUi() {
         initAccount();
-        initJobList();
+        initViewListAndJobList();
+//        initJobList(filterJob(null));
         initSelectedJobList();
+        initSearch();
         initCheckAllButton();
         initBuildAndRebuildButton();
         initUpdateButton();
@@ -82,12 +89,80 @@ public class JenkinsHelperWindow implements WindowWrapper {
         initErrorLogButton();
     }
 
+    private void initSearch() {
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                JTextField s = (JTextField) e.getComponent();
+                initJobList(filterJob(s.getText()));
+            }
+        });
+    }
+
     private void initErrorLogButton() {
+        errorLogButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                getErrorLog();
+            }
+        });
+        logTextarea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    JBPopupFactory.getInstance()
+                            .createListPopup(new Jpopup(Lists.newArrayList(Bundle.message("clearLog")),
+                                    logTextarea))
+                            .show(new RelativePoint(logTextarea,
+                                    new Point((int) logTextarea.getMousePosition().getX(),
+                                            (int) logTextarea.getMousePosition().getY())));
+                }
+            }
+        });
+    }
+
+    private void getErrorLog() {
+        selectedJobs.stream().forEach(job -> {
+            StringBuilder errorLogs = new StringBuilder();
+            try {
+                String consoleOutputText = job.details().getLastFailedBuild().details().getConsoleOutputText();
+                if (StringUtils.isBlank(consoleOutputText)) {
+                    return;
+                }
+                errorLogs.append(Bundle.message("jobName", job.getName())).append("\r\n");
+                String[] msg = consoleOutputText.split("\r\n");
+                Arrays.asList(msg).forEach(m -> {
+                    if (ERROR_LOG_KEYWORDS.stream().anyMatch(o -> m.toLowerCase().contains(o))) {
+                        errorLogs.append(m).append("\r\n");
+                    }
+                });
+                errorLogs.append("\r\n");
+                logTextarea.append(errorLogs.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 
     private void initAddParamsButton() {
+        addParamsButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                AddStringParamsDialog addStringParamsDialog = new AddStringParamsDialog(project, rootPanel);
+                addStringParamsDialog.show();
+                if (addStringParamsDialog.isOK()) {
+                    doAddStringParams(addStringParamsDialog.getStringParamsConfig());
+                }
+            }
+        });
+    }
 
+    private void doAddStringParams(StringParamsConfig config) {
+        selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.addParams(config, jk, job));
     }
 
     private void initUpdateButton() {
@@ -98,99 +173,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 UpdateJobDialog updateJobDialog = new UpdateJobDialog(project, rootPanel);
                 updateJobDialog.show();
                 if (updateJobDialog.isOK()) {
-                    UpdateConfig updateConfig = updateJobDialog.getUpdateConfig();
-                    doUpdate(updateConfig);
+                    doUpdate(updateJobDialog.getUpdateConfig());
                 }
             }
         });
     }
 
     private void doUpdate(UpdateConfig updateConfig) {
-        String newGitBranchName = updateConfig.getNewGitBranchName().trim();
-        String newBranchXml = "<hudson.plugins.git.BranchSpec>" + XML_SUFFIX
-                + "<name>" + newGitBranchName + "</name>" + XML_SUFFIX
-                + "</hudson.plugins.git.BranchSpec>";
-        HashMap<String, String> stringParamsMap = updateConfig.getStringParamsMap();
-        selectedJobs.stream().forEach(job -> {
-            try {
-                String jobXml = jk.getJobXml(job.getName());
-                Document document = DocumentHelper.parseText(jobXml);
-                Element rootElement = document.getRootElement();
-                if (StringUtils.isNotBlank(newGitBranchName)) {
-                    List<Node> nodes = rootElement.selectNodes("//hudson.plugins.git.BranchSpec");
-                    if (CollectionUtil.isNotEmpty(nodes)) {
-                        nodes.get(0).setDocument(DocumentHelper.parseText(newBranchXml));
-                    }
-                }
-                if (MapUtil.isNotEmpty(stringParamsMap)) {
-                    List<Node> nodes = rootElement.selectNodes("//properties/hudson.model.ParametersDefinitionProperty/parameterDefinitions/hudson.model.StringParameterDefinition");
-                    if (CollectionUtil.isNotEmpty(nodes)) {
-                        nodes.stream().forEach(node -> {
-                            Element parent = node.getParent();
-                            List<Element> elements = parent.elements();
-                            if (CollectionUtil.isNotEmpty(elements)) {
-                                elements.forEach(element -> {
-//                                    parent.elements().get(0).elements().get(0).getName()
-                                    Element stringParameterDefinition = parent.elements().get(0);
-                                    if (stringParameterDefinition != null) {
-                                        List<Element> childElements = stringParameterDefinition.elements();
-                                        if (childElements.stream().anyMatch(child -> StringUtils.equals(child.getName(), "name") && stringParamsMap.keySet().contains(child.getData()))) {
-                                            if (childElements.stream().noneMatch(child -> StringUtils.equals(child.getName(), "defaultValue"))) {
-                                                String defaultValueStr = "<defaultValue>" + stringParamsMap.get(element.getName()) + "</defaultValue>";
-                                                Document defaultValueDocument = null;
-                                                try {
-                                                    defaultValueDocument = DocumentHelper.parseText(defaultValueStr);
-                                                } catch (DocumentException e) {
-                                                    e.printStackTrace();
-                                                }
-                                                stringParameterDefinition.add(defaultValueDocument.getRootElement());
-                                            } else {
-                                                childElements.forEach(child -> {
-                                                    if (StringUtils.equals(child.getName(), "defaultValue")) {
-                                                        child.setData(stringParamsMap.get(element.getName()));
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
-
-                                });
-                            }
-                            System.out.println("");
-                        });
-                    }
-                }
-
-                //<hudson.plugins.git.BranchSpec>
-                //
-                //
-                //				<name>baseline_v2.4.8_20220425</name>
-                //
-                //
-                //			</hudson.plugins.git.BranchSpec>
-
-//                List<Element> elements = rootElement.elements("hudson.model.StringParameterDefinition");
-//                Iterator<Element> elementIterator = rootElement.elementIterator("hudson.model.StringParameterDefinition");
-                String xmlStr = rootElement.asXML();
-                System.out.println(jobXml);
-//                getElementsByTagName("hudson.plugins.git.BranchSpec")
-//                InputSource is = new InputSource(new StringReader(jobXml));
-//                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//                DocumentBuilder builder = factory.newDocumentBuilder();
-//                Document doc = builder.parse(is);
-//                NodeList brancheList = doc.getElementsByTagName("hudson.plugins.git.BranchSpec");
-//                for (int i = 0; i < brancheList.getLength(); i++) {
-//                    Node item = brancheList.item(i);
-//                }
-//                for branch in branches:
-//                name = branch.getElementsByTagName('name')[0]
-//                name.childNodes[0].data = new_branch
-//                update = True
-                jk.updateJob(job.getName(), xmlStr, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.updateJobConfig(updateConfig, jk, job));
     }
 
     private void initBuildAndRebuildButton() {
@@ -236,26 +226,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doBuild(BuildConfig buildConfig) {
-        selectedJobs.stream().forEach(job -> {
-            try {
-                if (buildConfig.getBuildLastFailedFlag()) {
-                    JobWithDetails details = job.details();
-                    if (details.getLastBuild().getNumber() != details.getLastFailedBuild().getNumber()) {
-                        return;
-                    }
-                    if (details.getQueueItem() != null && details.getLastCompletedBuild().getNumber() == details.getLastBuild().getNumber()) {
-                        return;
-                    }
-                }
-                if (MapUtil.isNotEmpty(buildConfig.getParamesMap())) {
-                    job.build(buildConfig.getParamesMap(), true);
-                } else {
-                    job.build(true);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        selectedJobs.stream().forEach(job -> JobBuildHelper.Companion.build(buildConfig, job));
         if (rebuildFlag) {
             try {
                 Thread.sleep(buildConfig.getReBuildTime() * 60 * 1000);
@@ -273,32 +244,62 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 super.mouseClicked(e);
                 JCheckBox checkbox = (JCheckBox) e.getComponent();
                 if (checkbox.isSelected()) {
-                    selectedJobList.setListData(allJobs.stream().map(Job::getName).toArray());
-                    selectedJobs = allJobs;
+//                    selectedJobList.setListData(allJobs.stream().map(Job::getName).toArray());
+                    selectedJobs.addAll(filterJobs);
+//                    jobList.setSelectionInterval(0, filterJobs.size());
+                    jobList.addSelectionInterval(0, filterJobs.size());
                 } else {
-                    selectedJobList.setListData(new String[]{});
-                    selectedJobs = new ArrayList<>();
+                    selectedJobs.removeAll(filterJobs);
+                    jobList.clearSelection();
                 }
                 initSelectedJobList();
             }
         });
     }
 
-    private void initJobList() {
-        jobList.setListData(allJobs.stream().map(Job::getName).toArray());
+    private void initJobList(List<Job> jobs) {
+
+        jobList.setListData(jobs.stream().map(Job::getName).toArray());
         jobList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {
                 if (super.isSelectedIndex(index0)) {
                     super.removeSelectionInterval(index0, index1);
-                    selectedJobs.remove(allJobs.get(index0));
+                    selectedJobs.remove(filterJobs.get(index0));
                 } else {
                     super.addSelectionInterval(index0, index1);
-                    selectedJobs.add(allJobs.get(index0));
+                    selectedJobs.add(filterJobs.get(index0));
                 }
                 initSelectedJobList();
             }
         });
+        if (CollectionUtil.isNotEmpty(selectedJobs)) {
+            jobList.setSelectedIndices(selectedJobs.stream()
+                    .map(o -> jobs.indexOf(o))
+                    .mapToInt(Integer::valueOf)
+                    .toArray());
+        } else {
+            jobList.clearSelection();
+        }
+    }
+
+    private List<Job> filterJob(String searchWord){
+        return filterJobs = allJobs
+                .stream()
+                .filter(o -> filterJobs(o, searchWord))
+                .collect(Collectors.toList());
+    }
+
+    private boolean filterJobs(Job o, String searchWord) {
+        Set<String> searchJobList = new HashSet<>();
+        if (StringUtils.isNotBlank(searchWord)) {
+            searchJobList = Arrays.stream(StringUtils.split(searchWord, Bundle.message("commaSperator"))).collect(Collectors.toSet());
+        }
+        return (CollectionUtil.isNotEmpty(searchJobList)
+                && ((searchJobList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchJobList).get(0)))
+                || (searchJobList.size() != 1 && searchJobList.stream().anyMatch(s -> StringUtils.equals(o.getName().toLowerCase(), s.toLowerCase())))))
+                || CollectionUtil.isEmpty(searchJobList);
+
     }
 
     private void initSelectedJobList() {
@@ -312,9 +313,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 } else {
                     super.addSelectionInterval(index0, index1);
                 }
-                int index = allJobs.indexOf(selectedJobs.get(index0));
+                int index = allJobs.indexOf(new ArrayList<>(selectedJobs).get(index0));
                 jobList.removeSelectionInterval(index, index);
-                selectedJobs.remove(selectedJobs.get(index0));
+                selectedJobs.remove(new ArrayList<>(selectedJobs).get(index0));
                 initSelectedJobList();
             }
         });
@@ -325,8 +326,16 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                new AccountDialog(project, rootPanel).show();
-                resetAccountList();
+                AccountDialog accountDialog = new AccountDialog(project, rootPanel);
+                accountDialog.show();
+                if (accountDialog.isOK() && !ac.getJks().contains(accountList.getSelectedItem())) {
+                    resetAccountList();
+                } else {
+                    if (oldAc.size() != ac.getJks().size()) {
+                        List<Jenkins> newAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
+                        newAc.stream().forEach(o -> accountList.addItem(o));
+                    }
+                }
             }
         });
         resetAccountList();
@@ -335,7 +344,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
 
     private void resetAccountList() {
         accountList.setModel(new DefaultComboBoxModel(ac.getJks().toArray()));
-        accountList.setSelectedIndex(-1);
+        accountList.insertItemAt(AccountState.Companion.getDefaultAc(), 0);
+        accountList.setSelectedIndex(0);
         accountList.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -351,10 +361,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 Jenkins jenkins = (Jenkins) e.getItem();
+                if (Objects.equals(AccountState.Companion.getDefaultAc(), jenkins)){
+                    return;
+                }
+                accountList.removeItem(AccountState.Companion.getDefaultAc());
                 JenkinsServer server = new Jenkins().server(jenkins);
                 JenkinsVersion version = server.getVersion();
                 if (version.getLiteralVersion() == "-1") {
-                    errorInfoLable.setText("Authentication failed!");
+                    errorInfoLable.setText(Bundle.message("authenticationFailed"));
                 } else {
                     jk = server;
                     errorInfoLable.setText("");
@@ -362,9 +376,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 }
             }
         });
-        initViewListAndJobList();
-        initSelectedJobList();
-        initCheckAllButton();
     }
 
     private void initViewListAndJobList() {
@@ -383,7 +394,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     return;
                 }
                 viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
-                viewList.setSelectedIndex(views.size() - 1);
+//                viewList.setSelectedIndex(views.size() - 1);
                 View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
                 setJobListByView(view);
             }
@@ -398,8 +409,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
         } else {
             allJobs = new ArrayList<>();
         }
-        selectedJobs = new ArrayList<>();
-        initJobList();
+        selectedJobs = new HashSet<>();
+        initJobList(filterJob(null));
     }
 
     @Override
