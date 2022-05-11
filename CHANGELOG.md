@@ -6,4 +6,4 @@
 
 ## [1.0.0]
 ### Added
-- Supports jenkins batch operations
+- Support jenkins batch operations

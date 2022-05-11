@@ -1,10 +1,10 @@
 package com.lvlifeng.jenkinshelper.ui;
 
-import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.ReadOnlyTableModel;
+import com.lvlifeng.jenkinshelper.icons.Icons;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import org.jetbrains.annotations.Nullable;

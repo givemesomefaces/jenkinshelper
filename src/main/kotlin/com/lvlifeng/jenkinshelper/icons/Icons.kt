@@ -1,4 +1,4 @@
-package com.github.lvlifeng.githelper.icons
+package com.lvlifeng.jenkinshelper.icons
 
 import com.intellij.openapi.util.IconLoader
 
