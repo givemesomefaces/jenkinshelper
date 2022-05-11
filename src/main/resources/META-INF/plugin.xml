@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin>
+<idea-plugin require-restart="false">
     <id>com.lvlifeng.jenkinshelper</id>
     <name>JenkinsHelper</name>
     <vendor url="https://github.com/Lv-Lifeng">Lv Lifeng</vendor>

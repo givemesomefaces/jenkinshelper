@@ -41,7 +41,10 @@
                         <preferred-size width="150" height="-1"/>
                       </grid>
                     </constraints>
-                    <properties/>
+                    <properties>
+                      <text value=""/>
+                      <toolTipText value="search. fuzzy search for one or accurate search for multiple. e.g.  type a or aaa,bbb "/>
+                    </properties>
                   </component>
                   <vspacer id="d298c">
                     <constraints>
@@ -91,6 +94,7 @@
                         <constraints/>
                         <properties>
                           <selectionMode value="0"/>
+                          <toolTipText value="All jobs of the view"/>
                         </properties>
                       </component>
                     </children>
@@ -104,7 +108,9 @@
                     <children>
                       <component id="4ef18" class="javax.swing.JList" binding="selectedJobList">
                         <constraints/>
-                        <properties/>
+                        <properties>
+                          <toolTipText value="All selected jobs will be build, update, add parasms or error log"/>
+                        </properties>
                       </component>
                     </children>
                   </scrollpane>
@@ -156,14 +162,17 @@
                       <text value="Error log"/>
                     </properties>
                   </component>
-                  <component id="bbf55" class="javax.swing.JButton" binding="stopRebuildButton" default-binding="true">
+                  <component id="bbf55" class="javax.swing.JButton" binding="stopBuildButton">
                     <constraints>
                       <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <background color="-12828863"/>
+                      <contentAreaFilled value="true"/>
+                      <foreground color="-14304469"/>
                       <hideActionText value="false"/>
-                      <text value="Stop Rebuild"/>
+                      <inheritsPopupMenu value="false"/>
+                      <text value="Stop Build"/>
                     </properties>
                   </component>
                 </children>
@@ -207,6 +216,7 @@
                         <constraints/>
                         <properties>
                           <editable value="false"/>
+                          <toolTipText value="log"/>
                         </properties>
                       </component>
                     </children>
@@ -255,7 +265,9 @@
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <toolTipText value="View list of the account"/>
+                </properties>
               </component>
             </children>
           </grid>
@@ -278,6 +290,7 @@
                 </constraints>
                 <properties>
                   <text value="Account"/>
+                  <toolTipText value="Account Manage"/>
                 </properties>
               </component>
               <component id="8ed3f" class="javax.swing.JComboBox" binding="accountList">
@@ -286,7 +299,9 @@
                     <preferred-size width="200" height="-1"/>
                   </grid>
                 </constraints>
-                <properties/>
+                <properties>
+                  <toolTipText value="Account list"/>
+                </properties>
               </component>
             </children>
           </grid>
