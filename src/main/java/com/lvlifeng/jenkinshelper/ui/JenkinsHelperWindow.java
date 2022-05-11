@@ -127,7 +127,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void getErrorLog() {
-        log(Bundle.message("queryErrorLogs"));
+        log(Bundle.message("startQueryErrorLogs"));
         try {
             for (Job job : selectedJobs) {
                 StringBuilder errorLogs = new StringBuilder();
@@ -135,9 +135,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 if (lastFailedBuild == null || lastFailedBuild.getNumber() == -1) {
                     continue;
                 }
-                if (!StringUtils.equals(lastFailedBuild.getUrl(), job.getUrl())) {
-                    errorLogs.append(Bundle.message("urlErrorMsg")).append(Bundle.message("enter"));
-                }
+//                if (!StringUtils.equals(lastFailedBuild.getUrl(), job.getUrl())) {
+//                    errorLogs.append(Bundle.message("urlErrorMsg")).append(Bundle.message("enter"));
+//                }
                 String consoleOutputText = lastFailedBuild.details().getConsoleOutputText();
                 if (StringUtils.isBlank(consoleOutputText)) {
                     continue;
@@ -150,8 +150,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     }
                 });
                 errorLogs.append(Bundle.message("enter"));
-                Bundle.message(errorLogs.toString());
             }
+            log(Bundle.message("endQueryErrorLogs"));
         } catch (UnknownHostException hostException) {
             log(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
         } catch (IOException ioException) {
@@ -277,7 +277,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void initJobList(List<Job> jobs) {
-
+        if (jobs == null) {
+            jobs = Lists.newArrayList();
+        }
         jobList.setListData(jobs.stream().map(Job::getName).toArray());
         jobList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
@@ -350,15 +352,26 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 if (accountDialog.isOK() && !ac.getJks().contains(accountList.getSelectedItem())) {
                     resetAccountList();
                 } else {
-                    if (oldAc.size() != ac.getJks().size()) {
+                    if (CollectionUtil.isNotEmpty(ac.getJks())
+                            && oldAc.size() != ac.getJks().size()) {
                         List<Jenkins> newAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
                         newAc.stream().forEach(o -> accountList.addItem(o));
+                    }
+                    if (CollectionUtil.isEmpty(ac.getJks())) {
+                        resetAccountList();
+                        initJobList(null);
+                        initSelectedJobList();
+                        clearSearch();
                     }
                 }
             }
         });
         resetAccountList();
 
+    }
+
+    private void clearSearch() {
+        searchField.setText("");
     }
 
     private void resetAccountList() {
