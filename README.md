@@ -6,8 +6,7 @@
 
 <!-- Plugin description -->
 ### Support batch operation for jenkins job 
-The JenkinsHelper window is at the bottom of the ide.  
-can select multiple jobs to operate.
+The JenkinsHelper window is at the bottom of the ide. it support select multiple jobs to operate.
 * build   
   * build with params
   * circular build if last build was failed 

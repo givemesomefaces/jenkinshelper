@@ -56,7 +56,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private JLabel selectedLable;
     private JButton accountButton;
     private JLabel errorInfoLable;
-    private JButton stopRebuildButton;
+    private JButton stopBuildButton;
 
     private AccountState ac = AccountState.Companion.getInstance();
     private static JenkinsServer jk = null;
@@ -203,8 +203,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void initBuildAndRebuildButton() {
-        stopRebuildButton.setEnabled(false);
-        stopRebuildButton.setVisible(false);
+        stopBuildButton.setEnabled(false);
+        stopBuildButton.setVisible(false);
         buildButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -227,21 +227,21 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     if (rebuildFlag) {
                         buildButton.setEnabled(false);
                         buildButton.setVisible(false);
-                        stopRebuildButton.setEnabled(true);
-                        stopRebuildButton.setVisible(true);
+                        stopBuildButton.setEnabled(true);
+                        stopBuildButton.setVisible(true);
                     }
                 }
             }
         });
-        stopRebuildButton.addMouseListener(new MouseAdapter() {
+        stopBuildButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 rebuildFlag = false;
                 buildButton.setEnabled(true);
                 buildButton.setVisible(true);
-                stopRebuildButton.setEnabled(false);
-                stopRebuildButton.setVisible(false);
+                stopBuildButton.setEnabled(false);
+                stopBuildButton.setVisible(false);
             }
         });
     }
@@ -265,9 +265,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 super.mouseClicked(e);
                 JCheckBox checkbox = (JCheckBox) e.getComponent();
                 if (checkbox.isSelected()) {
-//                    selectedJobList.setListData(allJobs.stream().map(Job::getName).toArray());
                     selectedJobs.addAll(filterJobs);
-//                    jobList.setSelectionInterval(0, filterJobs.size());
                     jobList.addSelectionInterval(0, filterJobs.size());
                 } else {
                     selectedJobs.removeAll(filterJobs);
@@ -364,6 +362,13 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void resetAccountList() {
+        if (CollectionUtil.isEmpty(ac.getJks())) {
+            accountList.setEnabled(false);
+            accountList.setVisible(false);
+        } else {
+            accountList.setEnabled(true);
+            accountList.setVisible(true);
+        }
         accountList.setModel(new DefaultComboBoxModel(ac.getJks().toArray()));
         accountList.insertItemAt(AccountState.Companion.getDefaultAc(), 0);
         accountList.setSelectedIndex(0);
