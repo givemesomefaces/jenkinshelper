@@ -1,5 +1,7 @@
 package com.lvlifeng.jenkinshelper.ui;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.CharUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.lvlifeng.jenkinshelper.Bundle;
@@ -7,12 +9,14 @@ import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.helper.JenkinsVersion;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 /**
  * @author Lv Lifeng
@@ -24,10 +28,9 @@ public class AddAccountDialog extends DialogWrapper {
     private JTextField nickname;
     private JTextField apiUrl;
     private JTextField userName;
-    private JTextField password;
+    private JPasswordField password;
     private JPanel rootPanel;
     private Jenkins jk;
-    private AccountState ac = AccountState.Companion.getInstance();
     private Component jenkinsHelperComponent;
 
 
@@ -36,7 +39,6 @@ public class AddAccountDialog extends DialogWrapper {
         this.setTitle(Bundle.message("addAccountDialogTitle"));
         this.jk = jk;
         this.jenkinsHelperComponent = jenkinsHelperComponent;
-        setSize(300, 150);
         init();
         initData();
     }
@@ -57,34 +59,30 @@ public class AddAccountDialog extends DialogWrapper {
     }
 
 
-
     @Override
     protected @Nullable ValidationInfo doValidate() {
         if (StringUtils.isBlank(apiUrl.getText())) {
-            return new ValidationInfo("Jenkins api url cannot be empty.", apiUrl);
+            return new ValidationInfo(Bundle.message("apiUrlEmptyValid"), apiUrl);
         }
-        if (!(apiUrl.getText().startsWith("http://") || apiUrl.getText().startsWith("https://"))) {
-            return new ValidationInfo("Jenkins api url must be start with http:// or https://.", apiUrl);
+        if (!(apiUrl.getText().startsWith(Bundle.message("http"))
+                || apiUrl.getText().startsWith(Bundle.message("https")))) {
+            return new ValidationInfo(Bundle.message("apiUrlValid"), apiUrl);
         }
         if (StringUtils.isBlank(userName.getText())) {
-            return new ValidationInfo("Jenkins username cannot be empty.", userName);
+            return new ValidationInfo(Bundle.message("userNameValid"), userName);
         }
-        if (StringUtils.isBlank(password.getText())) {
-            return new ValidationInfo("Jenkins password cannot be empty.", password);
+        if (CollectionUtil.isEmpty(Arrays.asList(password.getPassword()))) {
+            return new ValidationInfo(Bundle.message("passwordValid"), password);
         }
-        Jenkins newjk = new Jenkins(nickname.getText(), apiUrl.getText(), userName.getText(), password.getText());
-        JenkinsServer jenkinsServer= newjk.server(newjk);
-        JenkinsVersion version = jenkinsServer.getVersion();
-        if (version.getLiteralVersion() == "-1") {
-            return new ValidationInfo("Jenkins Authentication failed.");
+        boolean valid = AccountState.Companion.addAccount(new Jenkins(StringUtils.isBlank(nickname.getText()) ? apiUrl.getText() : nickname.getText(),
+                        apiUrl.getText(),
+                        userName.getText(),
+                        new String(password.getPassword())),
+                jk);
+        if (!valid) {
+            return new ValidationInfo(Bundle.message("authenticationFailed"));
         }
-        if (null != jk) {
-            ac.removeAccount(jk);
-        }
-        ac.addAccount(newjk);
         JPanel jenkinsHelperJpanel = (JPanel) jenkinsHelperComponent;
-//        jenkinsHelperComponent.repaint();
-//        jenkinsHelperComponent.revalidate();
         JPanel head = (JPanel) jenkinsHelperJpanel.getComponent(1);
         JPanel accountListJpanel = (JPanel) head.getComponent(1);
         JComboBox accountListComboBox = (JComboBox) accountListJpanel.getComponent(2);

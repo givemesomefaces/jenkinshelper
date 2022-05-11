@@ -277,9 +277,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void initJobList(List<Job> jobs) {
-        if (jobs == null) {
-            jobs = Lists.newArrayList();
-        }
         jobList.setListData(jobs.stream().map(Job::getName).toArray());
         jobList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
@@ -359,7 +356,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     }
                     if (CollectionUtil.isEmpty(ac.getJks())) {
                         resetAccountList();
-                        initJobList(null);
+                        initJobList(Lists.newArrayList());
                         initSelectedJobList();
                         clearSearch();
                     }
@@ -404,12 +401,10 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     return;
                 }
                 accountList.removeItem(AccountState.Companion.getDefaultAc());
-                JenkinsServer server = new Jenkins().server(jenkins);
-                JenkinsVersion version = server.getVersion();
-                if (version.getLiteralVersion() == "-1") {
+                if (!AccountState.Companion.validAccount(jenkins)) {
                     errorInfoLable.setText(Bundle.message("authenticationFailed"));
                 } else {
-                    jk = server;
+                    jk = jenkins.getServer();
                     errorInfoLable.setText("");
                     initViewListAndJobList();
                 }
