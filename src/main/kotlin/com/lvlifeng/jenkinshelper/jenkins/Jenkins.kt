@@ -35,6 +35,11 @@ class Jenkins constructor() {
         set(value) {
             field = value
         }
+    var server: JenkinsServer? = null
+        get() = field
+        set(value) {
+            field = value
+        }
 
     constructor(nickName: String?, apiUrl: String?, userName: String?, password: String?) : this() {
         this.nickName = nickName
@@ -44,18 +49,20 @@ class Jenkins constructor() {
     }
 
 
-    fun server(jk: Jenkins): JenkinsServer {
-        var jenkinsServer: JenkinsServer? = null
-        try {
-            jenkinsServer = JenkinsServer(
-                URI(jk.apiUrl),
-                jk.userName,
-                jk.password
-            )
-        } catch (e: URISyntaxException) {
-            e.printStackTrace()
+    companion object {
+        fun server(jk: Jenkins): JenkinsServer {
+            var jenkinsServer: JenkinsServer? = null
+            try {
+                jenkinsServer = JenkinsServer(
+                    URI(jk.apiUrl),
+                    jk.userName,
+                    jk.password
+                )
+            } catch (e: URISyntaxException) {
+                e.printStackTrace()
+            }
+            return jenkinsServer!!
         }
-        return jenkinsServer!!
     }
 
     fun client(jk: Jenkins): JenkinsHttpClient? {

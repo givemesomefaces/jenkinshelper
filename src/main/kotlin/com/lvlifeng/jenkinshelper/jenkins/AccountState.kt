@@ -6,6 +6,9 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.lvlifeng.jenkinshelper.Bundle
+import com.lvlifeng.jenkinshelper.jenkins.Jenkins.Companion.server
+import com.offbytwo.jenkins.JenkinsServer
+import org.apache.commons.lang3.StringUtils
 
 /**
  *
@@ -50,6 +53,28 @@ class AccountState : PersistentStateComponent<AccountState?> {
 
         val defaultAc: Jenkins
             get() = Jenkins(Bundle.message("defaultAccount"), null, null,null)
+
+        fun addAccount(newJenkins: Jenkins, currentJenkins: Jenkins?): Boolean {
+            val newJenkinsServer: JenkinsServer = server(newJenkins)
+            val version = newJenkinsServer.version
+            if (StringUtils.isBlank(version.literalVersion) || version.literalVersion === "-1") {
+                return false
+            }
+            if (null != currentJenkins) {
+                this.instance.removeAccount(currentJenkins)
+            }
+            this.instance.addAccount(newJenkins)
+            return true
+        }
+        fun validAccount(jenkins: Jenkins): Boolean {
+            val server = server(jenkins)
+            val version = server.version
+            if (StringUtils.isBlank(version.literalVersion) || version.literalVersion === "-1") {
+                return false
+            }
+            jenkins.server = server
+            return true
+        }
     }
 
     override fun getState(): AccountState? {

@@ -4,12 +4,12 @@ import com.github.lvlifeng.githelper.icons.Icons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.lvlifeng.jenkinshelper.Bundle;
+import com.lvlifeng.jenkinshelper.bean.ReadOnlyTableModel;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -132,7 +132,7 @@ public class AccountDialog extends DialogWrapper {
     }
 
     private TableModel serverModel(Collection<Jenkins> jks) {
-        Object[] columnNames = {"", "NickName", "ApiUrl", "Useranme", "Password"};
+        Object[] columnNames = {"", "NickName", "ApiUrl", "Username"};
         Object[][] data = new Object[jks.size()][columnNames.length];
         int i = 0;
         for (Jenkins jk : jks) {
@@ -144,10 +144,9 @@ public class AccountDialog extends DialogWrapper {
             row[1] = jk.getNickName();
             row[2] = jk.getApiUrl();
             row[3] = jk.getUserName();
-            row[4] = jk.getPassword();
             data[i] = row;
             i++;
         }
-        return new DefaultTableModel(data, columnNames);
+        return new ReadOnlyTableModel(data, columnNames);
     }
 }
