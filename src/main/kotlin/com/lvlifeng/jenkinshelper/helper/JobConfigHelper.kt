@@ -11,6 +11,7 @@ import org.dom4j.DocumentHelper
 import org.dom4j.Element
 import org.dom4j.Node
 import java.util.function.Consumer
+import kotlin.jvm.Throws
 
 /**
  *
@@ -22,17 +23,27 @@ class JobConfigHelper {
 
     companion object {
 
+        @Throws
         fun addParams(config: StringParamsConfig, jk: JenkinsServer, jb: Job) {
-            jk.addStringParam(jb.name, config.name, config.description, config.defaultValue)
+            try {
+                jk.addStringParam(jb.name, config.name, config.description, config.defaultValue)
+            } catch (ex: Exception) {
+                throw ex
+            }
         }
 
+        @Throws
         fun updateJobConfig(config: UpdateConfig, jk: JenkinsServer, jb: Job) {
             var jobXml = jk.getJobXml(jb.name)
             var document = DocumentHelper.parseText(jobXml)
             var updateBranch = updateGitBranch(document, config.newGitBranchName)
             var updateParams = updateStringParams(document, config.stringParams)
             if (updateBranch or updateParams) {
-                jk.updateJob(jb.name, document.rootElement.asXML(), true)
+                try {
+                    jk.updateJob(jb.name, document.rootElement.asXML(), true)
+                } catch (ex: Exception) {
+                    throw ex
+                }
             }
 
         }

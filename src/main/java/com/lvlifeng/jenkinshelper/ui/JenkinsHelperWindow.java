@@ -1,6 +1,7 @@
 package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
@@ -106,6 +107,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 errorLogButton.setEnabled(false);
                 getErrorLog();
                 errorLogButton.setEnabled(true);
@@ -151,14 +155,12 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 });
                 errorLogs.append(Bundle.message("enter"));
             }
-            log(Bundle.message("endQueryErrorLogs"));
         } catch (UnknownHostException hostException) {
             log(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
         } catch (IOException ioException) {
             log(ioException.getMessage());
         }
-
-
+        log(Bundle.message("endQueryErrorLogs"));
     }
 
     private void initAddParamsButton() {
@@ -166,6 +168,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 AddStringParamsDialog addStringParamsDialog = new AddStringParamsDialog(project, rootPanel);
                 addStringParamsDialog.show();
                 if (addStringParamsDialog.isOK()) {
@@ -179,7 +184,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
 
     private void doAddStringParams(StringParamsConfig config) {
         log(Bundle.message("startAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
-        selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.addParams(config, jk, job));
+        selectedJobs.stream().forEach(job -> {
+            try {
+                JobConfigHelper.Companion.addParams(config, jk, job);
+                log(Bundle.message("addParamsSuccess", job.getName()));
+            } catch (Exception e) {
+                log(Bundle.message("addParamsError", job.getName(), e.getMessage()));
+            }
+        });
         log(Bundle.message("endAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
 
     }
@@ -189,6 +201,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 UpdateJobDialog updateJobDialog = new UpdateJobDialog(project, rootPanel);
                 updateJobDialog.show();
                 if (updateJobDialog.isOK()) {
@@ -202,7 +217,15 @@ public class JenkinsHelperWindow implements WindowWrapper {
 
     private void doUpdate(UpdateConfig updateConfig) {
         log(Bundle.message("startUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
-        selectedJobs.stream().forEach(job -> JobConfigHelper.Companion.updateJobConfig(updateConfig, jk, job));
+        selectedJobs.stream().forEach(job -> {
+            try {
+                JobConfigHelper.Companion.updateJobConfig(updateConfig, jk, job);
+                log(Bundle.message("updateSuccess", job.getName()));
+            } catch (Exception e) {
+                log(Bundle.message("updateError", job.getName(), e.getMessage()));
+            }
+
+        });
         log(Bundle.message("endUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
     }
 
@@ -213,6 +236,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 BuildJobDialog buildJobDialog = new BuildJobDialog(project, rootPanel);
                 buildJobDialog.show();
                 if (buildJobDialog.isOK()) {
@@ -223,7 +249,12 @@ public class JenkinsHelperWindow implements WindowWrapper {
                         public void run() {
                             do {
                                 log(Bundle.message("startBuild", JSONUtil.toJsonStr(buildConfig)));
-                                doBuild(buildConfig);
+                                try {
+                                    doBuild(buildConfig);
+                                } catch (Exception exception) {
+                                    log(exception.getMessage());
+                                    break;
+                                }
                             } while (rebuildFlag);
                             log(Bundle.message("endBuild", JSONUtil.toJsonStr(buildConfig)));
                         }
@@ -241,6 +272,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 rebuildFlag = false;
                 buildButton.setEnabled(true);
                 buildButton.setVisible(true);
@@ -250,8 +284,15 @@ public class JenkinsHelperWindow implements WindowWrapper {
         });
     }
 
-    private void doBuild(BuildConfig buildConfig) {
-        selectedJobs.stream().forEach(job -> JobBuildHelper.Companion.build(buildConfig, job));
+    private void doBuild(BuildConfig buildConfig) throws Exception{
+        selectedJobs.stream().forEach(job -> {
+            try {
+                JobBuildHelper.Companion.build(buildConfig, job);
+                log(Bundle.message("buildSuccess", job.getName()));
+            } catch (Exception e) {
+                log(Bundle.message("buildError", job.getName(), e.getMessage()));
+            }
+        });
         if (rebuildFlag) {
             try {
                 Thread.sleep(buildConfig.getReBuildTime() * 60 * 1000);
@@ -267,6 +308,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 JCheckBox checkbox = (JCheckBox) e.getComponent();
                 if (checkbox.isSelected()) {
                     selectedJobs.addAll(filterJobs);
@@ -348,6 +392,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (e.getButton() != 1) {
+                    return;
+                }
                 oldAc = Lists.newArrayList(ac.getJks());
                 AccountDialog accountDialog = new AccountDialog(project, rootPanel);
                 accountDialog.show();
@@ -360,8 +407,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
                         addAc.stream().forEach(o -> accountList.addItem(o));
                         List<Jenkins> deleteAc = CollectionUtil.subtractToList(oldAc, ac.getJks());
                         deleteAc.stream().forEach(o -> accountList.removeItem(o));
-                    }
-                    if (CollectionUtil.isEmpty(ac.getJks())) {
+                    } else {
                         resetAccountList();
                         initJobList(Lists.newArrayList());
                         initSelectedJobList();
@@ -501,6 +547,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void log(String log) {
-        logTextarea.append(log + Bundle.message("enter"));
+        logTextarea.append(DateUtil.now() + "  " + log + Bundle.message("enter"));
     }
 }

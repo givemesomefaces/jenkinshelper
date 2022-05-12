@@ -7,6 +7,7 @@ import com.offbytwo.jenkins.model.JobWithDetails
 import org.apache.http.client.HttpResponseException
 import java.io.IOException
 import java.net.UnknownHostException
+import kotlin.jvm.Throws
 
 /**
  *
@@ -17,6 +18,8 @@ import java.net.UnknownHostException
 class JobBuildHelper {
 
     companion object {
+
+        @Throws
         fun build(config: BuildConfig, jb: Job) {
             if (config.buildLastFailedFlag == true) {
                 val details: JobWithDetails = jb.details()
@@ -33,12 +36,8 @@ class JobBuildHelper {
                 } else {
                     jb.build(true)
                 }
-            } catch (unKnow: UnknownHostException) {
-                throw unKnow
-            } catch (io: IOException) {
-                throw io
-            } catch (http: HttpResponseException) {
-                throw http
+            } catch (ex: Exception) {
+                throw ex
             }
         }
     }
