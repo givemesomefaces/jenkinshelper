@@ -30,7 +30,7 @@ class JobConfigHelper {
             var jobXml = jk.getJobXml(jb.name)
             var document = DocumentHelper.parseText(jobXml)
             var updateBranch = updateGitBranch(document, config.newGitBranchName)
-            var updateParams = updateStringParams(document, config.stringParamsMap)
+            var updateParams = updateStringParams(document, config.stringParams)
             if (updateBranch or updateParams) {
                 jk.updateJob(jb.name, document.rootElement.asXML(), true)
             }

@@ -25,7 +25,7 @@ class BuildConfig constructor(buildLastFailedFlag: Boolean, reBuildFlag: Boolean
             field = value
         }
 
-    var paramesMap: Map<String, String>? = paramesMap
+    var parames: Map<String, String>? = paramesMap
         get() = field
         set(value) {
             field = value
