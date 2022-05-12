@@ -15,6 +15,7 @@ import com.lvlifeng.jenkinshelper.bean.StringParamsConfig;
 import com.lvlifeng.jenkinshelper.bean.UpdateConfig;
 import com.lvlifeng.jenkinshelper.helper.JobBuildHelper;
 import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
+import com.lvlifeng.jenkinshelper.helper.WindowHelper;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -106,7 +106,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                errorLogButton.setEnabled(false);
                 getErrorLog();
+                errorLogButton.setEnabled(true);
             }
         });
         logTextarea.addMouseListener(new MouseAdapter() {
@@ -167,7 +169,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 AddStringParamsDialog addStringParamsDialog = new AddStringParamsDialog(project, rootPanel);
                 addStringParamsDialog.show();
                 if (addStringParamsDialog.isOK()) {
+                    addParamsButton.setEnabled(false);
                     doAddStringParams(addStringParamsDialog.getStringParamsConfig());
+                    addParamsButton.setEnabled(true);
                 }
             }
         });
@@ -188,7 +192,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 UpdateJobDialog updateJobDialog = new UpdateJobDialog(project, rootPanel);
                 updateJobDialog.show();
                 if (updateJobDialog.isOK()) {
+                    updateButton.setEnabled(false);
                     doUpdate(updateJobDialog.getUpdateConfig());
+                    updateButton.setEnabled(true);
                 }
             }
         });
@@ -300,22 +306,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private List<Job> filterJob(String searchWord) {
-        return filterJobs = allJobs
-                .stream()
-                .filter(o -> filterJobs(o, searchWord))
-                .collect(Collectors.toList());
-    }
-
-    private boolean filterJobs(Job o, String searchWord) {
-        Set<String> searchJobList = new HashSet<>();
-        if (StringUtils.isNotBlank(searchWord)) {
-            searchJobList = Arrays.stream(StringUtils.split(searchWord, Bundle.message("commaSeparator"))).collect(Collectors.toSet());
-        }
-        return (CollectionUtil.isNotEmpty(searchJobList)
-                && ((searchJobList.size() == 1 && o.getName().toLowerCase().contains(new ArrayList<>(searchJobList).get(0)))
-                || (searchJobList.size() != 1 && searchJobList.stream().anyMatch(s -> StringUtils.equals(o.getName().toLowerCase(), s.toLowerCase())))))
-                || CollectionUtil.isEmpty(searchJobList);
-
+        return filterJobs = WindowHelper.Companion.filterJob(searchWord, allJobs);
     }
 
     private void initSelectedJobList() {
@@ -398,8 +389,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
         List<Jenkins> accounts = Lists.newArrayList(AccountState.Companion.getDefaultAc());
         accounts.addAll(ac.getJks());
         accountList.setModel(new DefaultComboBoxModel(accounts.toArray()));
-//        accountList.insertItemAt(AccountState.Companion.getDefaultAc(), 0);
-//        accountList.setSelectedIndex(0);
         accountList.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {

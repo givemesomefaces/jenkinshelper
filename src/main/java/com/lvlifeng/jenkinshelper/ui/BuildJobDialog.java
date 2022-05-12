@@ -57,19 +57,6 @@ public class BuildJobDialog extends DialogWrapper {
 
     private void setUp() {
         paramsMap = StringParamsParseHelper.Companion.getParamsMap(buildParams.getText());
-        /*Map<String, String> paramsMap = new HashMap<>();
-        if (StringUtils.isNotBlank(buildParams.getText())) {
-            String[] paramArr = StringUtils.split(buildParams.getText(), ",，");
-            if (CollectionUtil.isNotEmpty(Arrays.asList(paramArr))) {
-                Arrays.asList(paramArr).stream().forEach(o -> {
-                    List<String> parames = Arrays.asList(o.split("="));
-                    if (CollectionUtil.isNotEmpty(parames)) {
-                        paramsMap.putIfAbsent(parames.get(0), parames.get(parames.size() - 1));
-                    }
-                });
-
-            }
-        }*/
         rebuildTime = (Integer) rebuildTimeField.getValue();
     }
 
