@@ -48,7 +48,7 @@ public class AddAccountDialog extends DialogWrapper {
             nickname.setText(jk.getNickName());
             apiUrl.setText(jk.getApiUrl());
             userName.setText(jk.getUserName());
-            password.setText(jk.getPassword());
+            password.setText(jk.getCpassword());
         }
     }
 

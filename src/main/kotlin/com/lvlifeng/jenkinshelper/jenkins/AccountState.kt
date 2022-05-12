@@ -1,9 +1,5 @@
 package com.lvlifeng.jenkinshelper.jenkins
 
-import com.intellij.credentialStore.CredentialAttributes
-import com.intellij.credentialStore.Credentials
-import com.intellij.credentialStore.generateServiceName
-import com.intellij.ide.passwordSafe.PasswordSafe
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
@@ -13,7 +9,6 @@ import com.lvlifeng.jenkinshelper.Bundle
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins.Companion.server
 import com.offbytwo.jenkins.JenkinsServer
 import org.apache.commons.lang3.StringUtils
-import org.jetbrains.annotations.Nullable
 
 
 /**
@@ -36,11 +31,6 @@ class AccountState : PersistentStateComponent<AccountState> {
             field = value
         }
     private var userName: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
-    private var password: String? = null
         get() = field
         set(value) {
             field = value
@@ -73,6 +63,7 @@ class AccountState : PersistentStateComponent<AccountState> {
             return true
         }
         fun validAccount(jenkins: Jenkins): Boolean {
+            jenkins.password = jenkins.getCpassword()
             val server = server(jenkins)
             val version = server.version
             if (StringUtils.isBlank(version.literalVersion) || version.literalVersion === "-1") {
@@ -88,33 +79,14 @@ class AccountState : PersistentStateComponent<AccountState> {
     }
 
     fun addAccount(jk: Jenkins) {
+        Credentials.saveCredential(jk.apiUrl + jk.userName, jk.userName, jk.password)
         removeAccount(jk)
         jks.add(jk)
     }
 
     fun removeAccount(jk: Jenkins) {
+        Credentials.removeCredential(jk.apiUrl + jk.userName)
         jks.remove(jk)
-    }
-
-    fun getPassword(urlAndUserName: String): @Nullable String? {
-//        val key: String? = null // e.g. serverURL, accountID
-        val credentialAttributes = createCredentialAttributes(urlAndUserName)
-
-//        val credentials: @Nullable Credentials? = credentialAttributes?.let { PasswordSafe.instance.get(it) }
-//        if (credentials != null) {
-//            val password: @NotNull String? = credentials.getPasswordAsString()
-//        }
-        return credentialAttributes?.let { PasswordSafe.instance.getPassword(it) }
-    }
-
-    private fun createCredentialAttributes(key: String): CredentialAttributes? {
-        return CredentialAttributes(generateServiceName(Bundle.message("subSytem"), key)
-        )
-    }
-    fun savePassword() {
-        val credentialAttributes = createCredentialAttributes(serverId) // see previous sample
-        val credentials = Credentials(username, password)
-        getInstance.getInstance().set(credentialAttributes, credentials)
     }
 
 }

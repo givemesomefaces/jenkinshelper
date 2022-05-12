@@ -68,11 +68,15 @@ class Jenkins constructor() {
     fun client(jk: Jenkins): JenkinsHttpClient? {
         var jenkinsHttpClient: JenkinsHttpClient? = null
         try {
-            jenkinsHttpClient = JenkinsHttpClient(URI(jk.apiUrl), jk.userName, jk.password)
+            jenkinsHttpClient = JenkinsHttpClient(URI(jk.apiUrl), jk.userName, jk.getCpassword())
         } catch (e: URISyntaxException) {
             e.printStackTrace()
         }
         return jenkinsHttpClient
+    }
+
+    fun getCpassword(): String? {
+        return Credentials.getPassword(this.apiUrl + this.userName)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -83,7 +87,6 @@ class Jenkins constructor() {
 
         if (apiUrl != other.apiUrl) return false
         if (userName != other.userName) return false
-        if (password != other.password) return false
 
         return true
     }
@@ -91,7 +94,6 @@ class Jenkins constructor() {
     override fun hashCode(): Int {
         var result = apiUrl?.hashCode() ?: 0
         result = 31 * result + (userName?.hashCode() ?: 0)
-        result = 31 * result + (password?.hashCode() ?: 0)
         return result
     }
 
