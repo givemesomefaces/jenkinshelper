@@ -18,7 +18,6 @@ import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.helper.JenkinsVersion;
 import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.Job;
 import com.offbytwo.jenkins.model.View;
@@ -31,8 +30,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -66,7 +65,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private List<Job> allJobs = new ArrayList<>();
     private List<Job> filterJobs = new ArrayList<>();
     private boolean rebuildFlag = false;
-    private List<Jenkins> oldAc = Lists.newArrayList(ac.getJks());
+    private List<Jenkins> oldAc = Lists.newArrayList();
     private static final List<String> ERROR_LOG_KEYWORDS = Lists.newArrayList(
             "[error]",
             "as failure",
@@ -321,6 +320,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void initSelectedJobList() {
+        setButtonStatusBySelectedJobs();
         selectedLable.setText(selectedJobs.size() + " Selected");
         selectedJobList.setListData(selectedJobs.stream().map(Job::getName).toArray());
         selectedJobList.setSelectionModel(new DefaultListSelectionModel() {
@@ -339,11 +339,26 @@ public class JenkinsHelperWindow implements WindowWrapper {
         });
     }
 
+    private void setButtonStatusBySelectedJobs() {
+        if (CollectionUtil.isEmpty(selectedJobs)) {
+            buildButton.setEnabled(false);
+            updateButton.setEnabled(false);
+            addParamsButton.setEnabled(false);
+            errorLogButton.setEnabled(false);
+        } else {
+            buildButton.setEnabled(true);
+            updateButton.setEnabled(true);
+            addParamsButton.setEnabled(true);
+            errorLogButton.setEnabled(true);
+        }
+    }
+
     private void initAccount() {
         accountButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                oldAc = Lists.newArrayList(ac.getJks());
                 AccountDialog accountDialog = new AccountDialog(project, rootPanel);
                 accountDialog.show();
                 if (accountDialog.isOK() && !ac.getJks().contains(accountList.getSelectedItem())) {
@@ -351,8 +366,10 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 } else {
                     if (CollectionUtil.isNotEmpty(ac.getJks())
                             && oldAc.size() != ac.getJks().size()) {
-                        List<Jenkins> newAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
-                        newAc.stream().forEach(o -> accountList.addItem(o));
+                        List<Jenkins> addAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
+                        addAc.stream().forEach(o -> accountList.addItem(o));
+                        List<Jenkins> deleteAc = CollectionUtil.subtractToList(oldAc, ac.getJks());
+                        deleteAc.stream().forEach(o -> accountList.removeItem(o));
                     }
                     if (CollectionUtil.isEmpty(ac.getJks())) {
                         resetAccountList();
@@ -379,9 +396,11 @@ public class JenkinsHelperWindow implements WindowWrapper {
             accountList.setEnabled(true);
             accountList.setVisible(true);
         }
-        accountList.setModel(new DefaultComboBoxModel(ac.getJks().toArray()));
-        accountList.insertItemAt(AccountState.Companion.getDefaultAc(), 0);
-        accountList.setSelectedIndex(0);
+        List<Jenkins> accounts = Lists.newArrayList(AccountState.Companion.getDefaultAc());
+        accounts.addAll(ac.getJks());
+        accountList.setModel(new DefaultComboBoxModel(accounts.toArray()));
+//        accountList.insertItemAt(AccountState.Companion.getDefaultAc(), 0);
+//        accountList.setSelectedIndex(0);
         accountList.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -410,6 +429,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 }
             }
         });
+        initViewListAndJobList();
     }
 
     private void initViewListAndJobList() {
@@ -422,18 +442,16 @@ public class JenkinsHelperWindow implements WindowWrapper {
             }
         });
         try {
-            if (null != jk) {
+            if (null != jk && MapUtil.isEmpty(views)) {
                 views = jk.getViews();
-                if (MapUtil.isEmpty(views)) {
-                    viewList.setModel(new DefaultComboBoxModel(Lists.newArrayList().toArray()));
-                    initSelectedJobList();
-                    return;
-                }
-                viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
-//                viewList.setSelectedIndex(views.size() - 1);
-                View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
-                setJobListByView(view);
+            } else {
+                views = MapUtil.empty();
             }
+            viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
+//                viewList.setSelectedIndex(views.size() - 1);
+//                View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
+            View view = Optional.ofNullable(views).map(o -> views.get(new ArrayList<>(views.keySet()).get(0))).orElse(null);
+            setJobListByView(view);
         } catch (IOException e) {
             e.printStackTrace();
         }
