@@ -15,7 +15,7 @@ class UpdateConfig constructor(newGitBranchName: String, stringParamsMap: HashMa
         set(value) {
             field = value
         }
-    var stringParamsMap: HashMap<String, String>? = stringParamsMap
+    var stringParams: HashMap<String, String>? = stringParamsMap
         get() = field
         set(value) {
             field = value

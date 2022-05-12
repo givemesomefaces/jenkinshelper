@@ -2,9 +2,9 @@ package com.lvlifeng.jenkinshelper.helper
 
 import cn.hutool.core.map.MapUtil
 import com.lvlifeng.jenkinshelper.bean.BuildConfig
-import com.offbytwo.jenkins.JenkinsServer
 import com.offbytwo.jenkins.model.Job
 import com.offbytwo.jenkins.model.JobWithDetails
+import org.apache.http.client.HttpResponseException
 import java.io.IOException
 import java.net.UnknownHostException
 
@@ -28,8 +28,8 @@ class JobBuildHelper {
                 }
             }
             try {
-                if (MapUtil.isNotEmpty(config.paramesMap)) {
-                    jb.build(config.paramesMap, true)
+                if (MapUtil.isNotEmpty(config.parames)) {
+                    jb.build(config.parames, true)
                 } else {
                     jb.build(true)
                 }
@@ -37,6 +37,8 @@ class JobBuildHelper {
                 throw unKnow
             } catch (io: IOException) {
                 throw io
+            } catch (http: HttpResponseException) {
+                throw http
             }
         }
     }

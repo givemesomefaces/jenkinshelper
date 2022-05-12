@@ -81,7 +81,6 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private void initUi() {
         initAccount();
         initViewListAndJobList();
-//        initJobList(filterJob(null));
         initSelectedJobList();
         initSearch();
         initCheckAllButton();
@@ -442,15 +441,13 @@ public class JenkinsHelperWindow implements WindowWrapper {
             }
         });
         try {
-            if (null != jk && MapUtil.isEmpty(views)) {
-                views = jk.getViews();
+            View view = null;
+            if (null != jk && MapUtil.isNotEmpty(views = jk.getViews())) {
+                view = views.get(new ArrayList<>(views.keySet()).get(0));
             } else {
                 views = MapUtil.empty();
             }
             viewList.setModel(new DefaultComboBoxModel(views.keySet().toArray()));
-//                viewList.setSelectedIndex(views.size() - 1);
-//                View view = views.get(new ArrayList<>(views.keySet()).get(views.size() - 1));
-            View view = Optional.ofNullable(views).map(o -> views.get(new ArrayList<>(views.keySet()).get(0))).orElse(null);
             setJobListByView(view);
         } catch (IOException e) {
             e.printStackTrace();
