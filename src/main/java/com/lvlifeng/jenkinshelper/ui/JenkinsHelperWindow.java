@@ -149,14 +149,17 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 if (StringUtils.isBlank(consoleOutputText)) {
                     continue;
                 }
-                errorLogs.append(Bundle.message("jobName", job.getName())).append(Bundle.message("enter"));
-                String[] msg = consoleOutputText.split(Bundle.message("enter"));
+                errorLogs.append(Bundle.message("jobName", job.getName())).append(Bundle.message("newLine"));
+                String[] msg = consoleOutputText.split(Bundle.message("newLine"));
                 Arrays.asList(msg).forEach(m -> {
                     if (ERROR_LOG_KEYWORDS.stream().anyMatch(o -> m.toLowerCase().contains(o))) {
-                        errorLogs.append(m).append(Bundle.message("enter"));
+                        errorLogs.append(m).append(Bundle.message("newLine"));
                     }
                 });
-                errorLogs.append(Bundle.message("enter"));
+                errorLogs.append(Bundle.message("newLine"));
+                if (StringUtils.isNotBlank(errorLogs.toString())) {
+                    log(errorLogs.toString());
+                }
             }
         } catch (UnknownHostException hostException) {
             log(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
@@ -569,6 +572,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void log(String log) {
-        logTextarea.append(DateUtil.now() + "  " + log + Bundle.message("enter"));
+        logTextarea.append(DateUtil.now() + "  " + log + Bundle.message("newLine"));
+        logTextarea.setCaretPosition(logTextarea.getText().length());
     }
 }
