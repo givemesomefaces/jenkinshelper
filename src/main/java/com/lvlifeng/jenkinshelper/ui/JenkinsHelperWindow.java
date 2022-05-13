@@ -107,9 +107,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 if (e.getButton() != 1) {
                     return;
                 }
-                errorLogButton.setEnabled(false);
-                getErrorLog();
-                errorLogButton.setEnabled(true);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        errorLogButton.setEnabled(false);
+                        getErrorLog();
+                        errorLogButton.setEnabled(true);
+                    }
+                }).start();
             }
         });
         logTextarea.addMouseListener(new MouseAdapter() {
@@ -171,9 +176,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 AddStringParamsDialog addStringParamsDialog = new AddStringParamsDialog(project, rootPanel);
                 addStringParamsDialog.show();
                 if (addStringParamsDialog.isOK()) {
-                    addParamsButton.setEnabled(false);
-                    doAddStringParams(addStringParamsDialog.getStringParamsConfig());
-                    addParamsButton.setEnabled(true);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            addParamsButton.setEnabled(false);
+                            doAddStringParams(addStringParamsDialog.getStringParamsConfig());
+                            addParamsButton.setEnabled(true);
+                        }
+                    }).start();
                 }
             }
         });
@@ -204,9 +214,14 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 UpdateJobDialog updateJobDialog = new UpdateJobDialog(project, rootPanel);
                 updateJobDialog.show();
                 if (updateJobDialog.isOK()) {
-                    updateButton.setEnabled(false);
-                    doUpdate(updateJobDialog.getUpdateConfig());
-                    updateButton.setEnabled(true);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateButton.setEnabled(false);
+                            doUpdate(updateJobDialog.getUpdateConfig());
+                            updateButton.setEnabled(true);
+                        }
+                    }).start();
                 }
             }
         });
