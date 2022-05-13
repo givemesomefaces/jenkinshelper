@@ -1,14 +1,10 @@
 package com.lvlifeng.jenkinshelper.helper
 
-import cn.hutool.core.collection.CollectionUtil
-import com.google.common.collect.Lists
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.function.Function
-import java.util.function.Predicate
-import java.util.stream.Collectors
-import java.util.stream.Stream
+import com.intellij.openapi.project.Project
+import java.util.function.Supplier
 
 /**
  *
@@ -20,6 +16,18 @@ class ProgressHelper {
 
 
     companion object {
-        
+        fun show(project: Project, title: String, message1: String, message2: String, canBeCancelled: Boolean, method: Supplier<Void>) {
+            ProgressManager.getInstance().run(object : Task.Modal(project, title, canBeCancelled) {
+                override fun run(indicator: ProgressIndicator) {
+                    indicator.text = message1
+                    method.get()
+                    indicator.text = message2
+                }
+
+                override fun onSuccess() {
+                    super.onSuccess()
+                }
+            })
+        }
     }
 }

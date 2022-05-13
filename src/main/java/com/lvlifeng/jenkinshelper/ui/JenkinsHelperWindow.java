@@ -13,6 +13,7 @@ import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.*;
 import com.lvlifeng.jenkinshelper.helper.JobBuildHelper;
 import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
+import com.lvlifeng.jenkinshelper.helper.ProgressHelper;
 import com.lvlifeng.jenkinshelper.helper.WindowHelper;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
@@ -296,7 +297,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
         });
     }
 
-    private void doBuild(BuildConfig buildConfig) throws Exception{
+    private void doBuild(BuildConfig buildConfig) throws Exception {
         selectedJobs.stream().forEach(job -> {
             try {
                 JobBuildHelper.Companion.build(buildConfig, job);
@@ -461,19 +462,27 @@ public class JenkinsHelperWindow implements WindowWrapper {
         accountList.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                Jenkins jenkins = (Jenkins) e.getItem();
-                if (Objects.equals(AccountState.Companion.getDefaultAc(), jenkins)) {
-                    return;
-                }
-                accountList.removeItem(AccountState.Companion.getDefaultAc());
-                AccountStatus accountStatus = Jenkins.Companion.validAndGet(jenkins);
-                if (!accountStatus.getStatus()) {
-                    errorInfoLable.setText(Bundle.message("authenticationFailed"));
-                } else {
-                    jk = accountStatus.getJenkinsServer();
-                    errorInfoLable.setText("");
-                    initViewListAndJobList();
-                }
+                ProgressHelper.Companion.show(project,
+                        Bundle.message("switchAccount"),
+                        Bundle.message("checkAccount"),
+                        Bundle.message("checkAccountEnd"),
+                        false,
+                        () -> {
+                            Jenkins jenkins = (Jenkins) e.getItem();
+                            if (Objects.equals(AccountState.Companion.getDefaultAc(), jenkins)) {
+                                return null;
+                            }
+                            accountList.removeItem(AccountState.Companion.getDefaultAc());
+                            AccountStatus accountStatus = Jenkins.Companion.validAndGet(jenkins);
+                            if (!accountStatus.getStatus()) {
+                                errorInfoLable.setText(Bundle.message("authenticationFailed"));
+                            } else {
+                                jk = accountStatus.getJenkinsServer();
+                                errorInfoLable.setText("");
+                                initViewListAndJobList();
+                            }
+                            return null;
+                        });
             }
         });
         initViewListAndJobList();
