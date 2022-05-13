@@ -1,7 +1,10 @@
 package com.lvlifeng.jenkinshelper.jenkins
 
+import com.lvlifeng.jenkinshelper.bean.AccountStatus
+import com.lvlifeng.jenkinshelper.jenkins.Credentials.Companion.getPassword
 import com.offbytwo.jenkins.JenkinsServer
 import com.offbytwo.jenkins.client.JenkinsHttpClient
+import org.apache.commons.lang3.StringUtils
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -30,38 +33,51 @@ class Jenkins constructor() {
         set(value) {
             field = value
         }
-    var password: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
-    var server: JenkinsServer? = null
-        get() = field
-        set(value) {
-            field = value
-        }
 
-    constructor(nickName: String?, apiUrl: String?, userName: String?, password: String?) : this() {
+    constructor(nickName: String?, apiUrl: String?, userName: String?) : this() {
         this.nickName = nickName
         this.apiUrl = apiUrl
         this.userName = userName
-        this.password = password
     }
 
-
     companion object {
-        fun server(jk: Jenkins): JenkinsServer {
+        fun vaildAndSave(newJk: Jenkins, newJkPassword: String, jk: Jenkins?): Boolean {
+            var jenkinsServer: JenkinsServer? = JenkinsServer(
+                URI(newJk.apiUrl),
+                newJk.userName,
+                newJkPassword
+            )
+
+            jenkinsServer?.let {
+                if (jenkinsServer.version != null
+                    && StringUtils.isNotBlank(jenkinsServer.version.literalVersion)
+                    &&  jenkinsServer.version.literalVersion != "-1") {
+                    AccountState.addAccount(newJk, newJkPassword, jk)
+                    return true
+                }
+            }
+            return false
+        }
+
+        fun validAndGet(jk: Jenkins): AccountStatus {
             var jenkinsServer: JenkinsServer? = null
             try {
                 jenkinsServer = JenkinsServer(
                     URI(jk.apiUrl),
                     jk.userName,
-                    jk.password
+                    getPassword(jk.apiUrl + jk.userName)
                 )
             } catch (e: URISyntaxException) {
                 e.printStackTrace()
             }
-            return jenkinsServer!!
+            jenkinsServer?.let {
+                if (jenkinsServer.version != null
+                    && StringUtils.isNotBlank(jenkinsServer.version.literalVersion)
+                    &&  jenkinsServer.version.literalVersion != "-1") {
+                    return AccountStatus(true, it)
+                }
+            }
+            return AccountStatus(false, null)
         }
     }
 

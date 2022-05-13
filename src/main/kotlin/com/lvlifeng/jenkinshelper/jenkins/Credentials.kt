@@ -5,6 +5,7 @@ import com.intellij.credentialStore.Credentials
 import com.intellij.credentialStore.generateServiceName
 import com.intellij.ide.passwordSafe.PasswordSafe
 import com.lvlifeng.jenkinshelper.Bundle
+import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
 
@@ -23,10 +24,10 @@ class Credentials {
 //        val key: String? = null // e.g. serverURL, accountID
             val credentialAttributes = createCredentialAttributes(urlAndUserName)
 
-//        val credentials: @Nullable Credentials? = credentialAttributes?.let { PasswordSafe.instance.get(it) }
-//        if (credentials != null) {
-//            val password: @NotNull String? = credentials.getPasswordAsString()
-//        }
+            val credentials: @Nullable Credentials? = credentialAttributes?.let { PasswordSafe.instance.get(it) }
+            if (credentials != null) {
+                val password: @NotNull String? = credentials.getPasswordAsString()
+            }
             return credentialAttributes?.let { PasswordSafe.instance.getPassword(it) }
         }
 

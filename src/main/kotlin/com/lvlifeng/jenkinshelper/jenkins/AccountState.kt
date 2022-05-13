@@ -6,9 +6,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.lvlifeng.jenkinshelper.Bundle
-import com.lvlifeng.jenkinshelper.jenkins.Jenkins.Companion.server
-import com.offbytwo.jenkins.JenkinsServer
-import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang.StringUtils
 
 
 /**
@@ -48,28 +46,16 @@ class AccountState : PersistentStateComponent<AccountState> {
             get() = ServiceManager.getService(AccountState::class.java)
 
         val defaultAc: Jenkins
-            get() = Jenkins(Bundle.message("defaultAccount"), "", "","")
+            get() = Jenkins(Bundle.message("defaultAccount"), "", "")
 
-        fun addAccount(newJenkins: Jenkins, currentJenkins: Jenkins?): Boolean {
-            val newJenkinsServer: JenkinsServer = server(newJenkins)
-            val version = newJenkinsServer.version
-            if (StringUtils.isBlank(version.literalVersion) || version.literalVersion === "-1") {
-                return false
+        fun addAccount(newJenkins: Jenkins, password: String, currentJenkins: Jenkins?): Boolean {
+            if (StringUtils.isBlank(newJenkins.nickName)) {
+                newJenkins.nickName = newJenkins.apiUrl
             }
-            if (null != currentJenkins) {
+            currentJenkins?.let {
                 this.instance.removeAccount(currentJenkins)
             }
-            this.instance.addAccount(newJenkins)
-            return true
-        }
-        fun validAccount(jenkins: Jenkins): Boolean {
-            jenkins.password = jenkins.getCpassword()
-            val server = server(jenkins)
-            val version = server.version
-            if (StringUtils.isBlank(version.literalVersion) || version.literalVersion === "-1") {
-                return false
-            }
-            jenkins.server = server
+            this.instance.addAccount(newJenkins, password)
             return true
         }
     }
@@ -78,9 +64,8 @@ class AccountState : PersistentStateComponent<AccountState> {
         return this
     }
 
-    fun addAccount(jk: Jenkins) {
-        Credentials.saveCredential(jk.apiUrl + jk.userName, jk.userName, jk.password)
-        removeAccount(jk)
+    fun addAccount(jk: Jenkins, password: String) {
+        Credentials.saveCredential(jk.apiUrl + jk.userName, jk.userName, password)
         jks.add(jk)
     }
 
