@@ -1,15 +1,10 @@
 package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.CharUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.lvlifeng.jenkinshelper.Bundle;
-import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
-import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.helper.JenkinsVersion;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,11 +69,12 @@ public class AddAccountDialog extends DialogWrapper {
         if (CollectionUtil.isEmpty(Arrays.asList(password.getPassword()))) {
             return new ValidationInfo(Bundle.message("passwordValid"), password);
         }
-        boolean valid = AccountState.Companion.addAccount(new Jenkins(StringUtils.isBlank(nickname.getText()) ? apiUrl.getText() : nickname.getText(),
+        boolean valid = Jenkins.Companion.vaildAndSave(
+                new Jenkins(
+                        nickname.getText(),
                         apiUrl.getText(),
-                        userName.getText(),
-                        new String(password.getPassword())),
-                jk);
+                        userName.getText()),
+                new String(password.getPassword()), jk);
         if (!valid) {
             return new ValidationInfo(Bundle.message("authenticationFailed"));
         }

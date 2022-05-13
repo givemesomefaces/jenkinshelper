@@ -10,10 +10,7 @@ import com.intellij.openapi.ui.WindowWrapper;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.awt.RelativePoint;
 import com.lvlifeng.jenkinshelper.Bundle;
-import com.lvlifeng.jenkinshelper.bean.BuildConfig;
-import com.lvlifeng.jenkinshelper.bean.Jpopup;
-import com.lvlifeng.jenkinshelper.bean.StringParamsConfig;
-import com.lvlifeng.jenkinshelper.bean.UpdateConfig;
+import com.lvlifeng.jenkinshelper.bean.*;
 import com.lvlifeng.jenkinshelper.helper.JobBuildHelper;
 import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
 import com.lvlifeng.jenkinshelper.helper.WindowHelper;
@@ -454,10 +451,11 @@ public class JenkinsHelperWindow implements WindowWrapper {
                     return;
                 }
                 accountList.removeItem(AccountState.Companion.getDefaultAc());
-                if (!AccountState.Companion.validAccount(jenkins)) {
+                AccountStatus accountStatus = Jenkins.Companion.validAndGet(jenkins);
+                if (!accountStatus.getStatus()) {
                     errorInfoLable.setText(Bundle.message("authenticationFailed"));
                 } else {
-                    jk = jenkins.getServer();
+                    jk = accountStatus.getJenkinsServer();
                     errorInfoLable.setText("");
                     initViewListAndJobList();
                 }
