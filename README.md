@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/19155)
 
 <!-- Plugin description -->
-### Support batch operation for jenkins job 
+### Supports selecting multiple jobs at once to operate for jenkins 
 The JenkinsHelper window is at the bottom of the ide. it support select multiple jobs to operate.
 * build   
   * build with params
