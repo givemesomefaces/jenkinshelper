@@ -1,7 +1,6 @@
 package com.lvlifeng.jenkinshelper.ui;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.google.common.collect.Lists;
@@ -11,10 +10,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.ui.awt.RelativePoint;
 import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.*;
-import com.lvlifeng.jenkinshelper.helper.JobBuildHelper;
-import com.lvlifeng.jenkinshelper.helper.JobConfigHelper;
-import com.lvlifeng.jenkinshelper.helper.ProgressHelper;
-import com.lvlifeng.jenkinshelper.helper.WindowHelper;
+import com.lvlifeng.jenkinshelper.helper.*;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
 import com.offbytwo.jenkins.JenkinsServer;
@@ -50,7 +46,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private JButton addParamsButton;
     private JButton errorLogButton;
     private JComboBox accountList;
-    private JTextArea logTextarea;
+    private JTextPane logTextarea;
     private JLabel selectedLable;
     private JButton accountButton;
     private JLabel errorInfoLable;
@@ -134,7 +130,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void getErrorLog() {
-        log(Bundle.message("startQueryErrorLogs"));
+        logInfo(Bundle.message("startQueryErrorLogs"));
         try {
             for (Job job : selectedJobs) {
                 StringBuilder errorLogs = new StringBuilder();
@@ -158,15 +154,15 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 });
                 errorLogs.append(Bundle.message("newLine"));
                 if (StringUtils.isNotBlank(errorLogs.toString())) {
-                    log(errorLogs.toString());
+                    logInfo(errorLogs.toString());
                 }
             }
         } catch (UnknownHostException hostException) {
-            log(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
+            logInfo(hostException.getMessage() + ". " + Bundle.message("urlErrorMsg"));
         } catch (IOException ioException) {
-            log(ioException.getMessage());
+            logInfo(ioException.getMessage());
         }
-        log(Bundle.message("endQueryErrorLogs"));
+        logInfo(Bundle.message("endQueryErrorLogs"));
     }
 
     private void initAddParamsButton() {
@@ -194,16 +190,16 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doAddStringParams(StringParamsConfig config) {
-        log(Bundle.message("startAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
+        logInfo(Bundle.message("startAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
         selectedJobs.stream().forEach(job -> {
             try {
                 JobConfigHelper.Companion.addParams(config, jk, job);
-                log(Bundle.message("addParamsSuccess", job.getName()));
+                logInfo(Bundle.message("addParamsSuccess", job.getName()));
             } catch (Exception e) {
-                log(Bundle.message("addParamsError", job.getName(), e.getMessage()));
+                logInfo(Bundle.message("addParamsError", job.getName(), e.getMessage()));
             }
         });
-        log(Bundle.message("endAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
+        logInfo(Bundle.message("endAddStringParam", selectedJobs.size(), JSONUtil.toJsonStr(config)));
 
     }
 
@@ -232,17 +228,17 @@ public class JenkinsHelperWindow implements WindowWrapper {
     }
 
     private void doUpdate(UpdateConfig updateConfig) {
-        log(Bundle.message("startUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
+        logInfo(Bundle.message("startUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
         selectedJobs.stream().forEach(job -> {
             try {
                 JobConfigHelper.Companion.updateJobConfig(updateConfig, jk, job);
-                log(Bundle.message("updateSuccess", job.getName()));
+                logInfo(Bundle.message("updateSuccess", job.getName()));
             } catch (Exception e) {
-                log(Bundle.message("updateError", job.getName(), e.getMessage()));
+                logInfo(Bundle.message("updateError", job.getName(), e.getMessage()));
             }
 
         });
-        log(Bundle.message("endUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
+        logInfo(Bundle.message("endUpdate", selectedJobs.size(), JSONUtil.toJsonStr(updateConfig)));
     }
 
     private void initBuildAndRebuildButton() {
@@ -264,15 +260,15 @@ public class JenkinsHelperWindow implements WindowWrapper {
                         @Override
                         public void run() {
                             do {
-                                log(Bundle.message("startBuild", JSONUtil.toJsonStr(buildConfig)));
+                                logInfo(Bundle.message("startBuild", JSONUtil.toJsonStr(buildConfig)));
                                 try {
                                     doBuild(buildConfig);
                                 } catch (Exception exception) {
-                                    log(exception.getMessage());
+                                    logInfo(exception.getMessage());
                                     break;
                                 }
                             } while (rebuildFlag);
-                            log(Bundle.message("endBuild", JSONUtil.toJsonStr(buildConfig)));
+                            logInfo(Bundle.message("endBuild", JSONUtil.toJsonStr(buildConfig)));
                         }
                     }).start();
                     if (rebuildFlag) {
@@ -304,9 +300,9 @@ public class JenkinsHelperWindow implements WindowWrapper {
         selectedJobs.stream().forEach(job -> {
             try {
                 JobBuildHelper.Companion.build(buildConfig, job);
-                log(Bundle.message("buildSuccess", job.getName()));
+                logInfo(Bundle.message("buildSuccess", job.getName()));
             } catch (Exception e) {
-                log(Bundle.message("buildError", job.getName(), e.getMessage()));
+                logInfo(Bundle.message("buildError", job.getName(), e.getMessage()));
             }
         });
         if (rebuildFlag) {
@@ -417,12 +413,13 @@ public class JenkinsHelperWindow implements WindowWrapper {
                 if (accountDialog.isOK() && !ac.getJks().contains(accountList.getSelectedItem())) {
                     resetAccountList();
                 } else {
-                    if (CollectionUtil.isNotEmpty(ac.getJks())
-                            && oldAc.size() != ac.getJks().size()) {
-                        List<Jenkins> addAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
-                        addAc.stream().forEach(o -> accountList.addItem(o));
-                        List<Jenkins> deleteAc = CollectionUtil.subtractToList(oldAc, ac.getJks());
-                        deleteAc.stream().forEach(o -> accountList.removeItem(o));
+                    if (CollectionUtil.isNotEmpty(ac.getJks())) {
+                        if (oldAc.size() != ac.getJks().size()) {
+                            List<Jenkins> addAc = CollectionUtil.subtractToList(ac.getJks(), oldAc);
+                            addAc.stream().forEach(o -> accountList.addItem(o));
+                            List<Jenkins> deleteAc = CollectionUtil.subtractToList(oldAc, ac.getJks());
+                            deleteAc.stream().forEach(o -> accountList.removeItem(o));
+                        }
                     } else {
                         resetAccountList();
                         initJobList(Lists.newArrayList());
@@ -571,8 +568,13 @@ public class JenkinsHelperWindow implements WindowWrapper {
 
     }
 
-    private void log(String log) {
-        logTextarea.append(DateUtil.now() + "  " + log + Bundle.message("newLine"));
-        logTextarea.setCaretPosition(logTextarea.getText().length());
+    private void logInfo(String log) {
+        LogHelper.Companion.append(logTextarea, log);
     }
+
+    private void logError(String log) {
+        LogHelper.Companion.append(logTextarea, log);
+    }
+
+
 }

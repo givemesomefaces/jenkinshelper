@@ -24,10 +24,10 @@ class Credentials {
 //        val key: String? = null // e.g. serverURL, accountID
             val credentialAttributes = createCredentialAttributes(urlAndUserName)
 
-            val credentials: @Nullable Credentials? = credentialAttributes?.let { PasswordSafe.instance.get(it) }
-            if (credentials != null) {
-                val password: @NotNull String? = credentials.getPasswordAsString()
-            }
+//            val credentials: @Nullable Credentials? = credentialAttributes?.let { PasswordSafe.instance.get(it) }
+//            if (credentials != null) {
+//                val password: @NotNull String? = credentials.getPasswordAsString()
+//            }
             return credentialAttributes?.let { PasswordSafe.instance.getPassword(it) }
         }
 
