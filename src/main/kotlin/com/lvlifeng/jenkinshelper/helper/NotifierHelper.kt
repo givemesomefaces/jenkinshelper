@@ -14,19 +14,19 @@ import com.sun.istack.Nullable
 object NotifierHelper {
 
     fun notifyError(@Nullable project: Project?, content: String?) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup("JenkinsHelper Notification Group")
             .createNotification(content!!, NotificationType.ERROR)
             .notify(project)
     }
 
     fun notifyInfo(@Nullable project: Project?, content: String?) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup("JenkinsHelper Notification Group")
             .createNotification(content!!, NotificationType.INFORMATION)
             .notify(project)
     }
 
     fun notifyWarn(@Nullable project: Project?, content: String?) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Custom Notification Group")
+        NotificationGroupManager.getInstance().getNotificationGroup("JenkinsHelper Notification Group")
             .createNotification(content!!, NotificationType.WARNING)
             .notify(project)
     }

@@ -11,7 +11,7 @@
         <projectService serviceImplementation="com.lvlifeng.jenkinshelper.services.MyProjectService"/>
         <toolWindow factoryClass="com.lvlifeng.jenkinshelper.window.JenkinsHelperFactory" id="JenkinsHelper" anchor="bottom" icon="/icons/jenkinsHelper.svg"/>
         <applicationService serviceInterface="com.lvlifeng.jenkinshelper.jenkins.AccountState" serviceImplementation="com.lvlifeng.jenkinshelper.jenkins.AccountState"/>
-        <notificationGroup id="Custom Notification Group" displayType="BALLOON" key="notification.group.name"/>
+        <notificationGroup id="JenkinsHelper Notification Group" displayType="BALLOON" key="notification.group.name"/>
     </extensions>
 
     <applicationListeners>
