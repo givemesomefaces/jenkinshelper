@@ -1,8 +1,8 @@
 # JenkinsHelper
 
 ![Build](https://github.com/Lv-lifeng/JenkinsHelper/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/19155)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/19155)
 
 <!-- Plugin description -->
 ### Support batch operation for jenkins job 
@@ -18,7 +18,7 @@ The JenkinsHelper window is at the bottom of the ide. it support select multiple
 * error log
   * filter error log 
 
-[![O6iPjU.gif](https://s1.ax1x.com/2022/05/14/O6iPjU.gif)](https://imgtu.com/i/O6iPjU)
+![O6iPjU.gif](https://s1.ax1x.com/2022/05/14/O6iPjU.gif)
 <!-- Plugin description end -->
 
 ## Installation
