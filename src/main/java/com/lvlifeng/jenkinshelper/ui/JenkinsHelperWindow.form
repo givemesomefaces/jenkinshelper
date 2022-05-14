@@ -212,13 +212,11 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="a14a6" class="javax.swing.JTextArea" binding="logTextarea">
+                      <component id="411a4" class="javax.swing.JTextPane" binding="logTextarea">
                         <constraints/>
                         <properties>
                           <editable value="false"/>
-                          <lineWrap value="true"/>
                           <toolTipText value="log"/>
-                          <wrapStyleWord value="true"/>
                         </properties>
                       </component>
                     </children>
