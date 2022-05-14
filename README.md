@@ -18,7 +18,7 @@ The JenkinsHelper window is at the bottom of the ide. it support select multiple
 * error log
   * filter error log 
 
-<img src="https://s1.ax1x.com/2022/05/14/O6iPjU.gif" width="400">
+<img src="https://s1.ax1x.com/2022/05/14/O6iPjU.gif" width="300">
 <!-- Plugin description end -->
 
 ## Installation
