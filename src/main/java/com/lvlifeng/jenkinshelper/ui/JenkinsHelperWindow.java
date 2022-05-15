@@ -7,12 +7,15 @@ import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.WindowWrapper;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.ColoredListCellRenderer;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBList;
 import com.lvlifeng.jenkinshelper.Bundle;
 import com.lvlifeng.jenkinshelper.bean.*;
 import com.lvlifeng.jenkinshelper.helper.*;
 import com.lvlifeng.jenkinshelper.jenkins.AccountState;
 import com.lvlifeng.jenkinshelper.jenkins.Jenkins;
+import com.lvlifeng.jenkinshelper.renderer.JobListRenderer;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.Job;
@@ -39,8 +42,8 @@ public class JenkinsHelperWindow implements WindowWrapper {
     private JComboBox viewList;
     private JTextField searchField;
     private JCheckBox selectAllCheckBox;
-    private JList jobList;
-    private JList selectedJobList;
+    private JBList jobList;
+    private JBList selectedJobList;
     private JButton buildButton;
     private JButton updateButton;
     private JButton addParamsButton;
@@ -338,6 +341,7 @@ public class JenkinsHelperWindow implements WindowWrapper {
 
     private void initJobList(List<Job> jobs) {
         jobList.setListData(jobs.stream().map(Job::getName).toArray());
+//        jobList.setCellRenderer(new JobListRenderer());
         jobList.setSelectionModel(new DefaultListSelectionModel() {
             @Override
             public void setSelectionInterval(int index0, int index1) {

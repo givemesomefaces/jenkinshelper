@@ -90,7 +90,7 @@
                     </properties>
                     <border type="empty"/>
                     <children>
-                      <component id="102e9" class="javax.swing.JList" binding="jobList">
+                      <component id="102e9" class="com.intellij.ui.components.JBList" binding="jobList">
                         <constraints/>
                         <properties>
                           <selectionMode value="0"/>
@@ -106,7 +106,7 @@
                     <properties/>
                     <border type="empty"/>
                     <children>
-                      <component id="4ef18" class="javax.swing.JList" binding="selectedJobList">
+                      <component id="4ef18" class="com.intellij.ui.components.JBList" binding="selectedJobList">
                         <constraints/>
                         <properties>
                           <toolTipText value="All selected jobs will be build, update, add parasms or error log"/>
