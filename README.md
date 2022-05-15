@@ -21,6 +21,10 @@ The JenkinsHelper window is at the bottom of the ide. it support select multiple
 ![O6iPjU.gif](https://s1.ax1x.com/2022/05/14/O6iPjU.gif)
 <!-- Plugin description end -->
 
+### TODO LIST
+1. Job list add build status and health status 
+2. Support more parameter types
+3. ...
 ## Installation
 
 - Using IDE built-in plugin system:
