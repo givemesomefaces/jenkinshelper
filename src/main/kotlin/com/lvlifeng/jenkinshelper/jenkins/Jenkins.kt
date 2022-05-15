@@ -4,6 +4,8 @@ import com.lvlifeng.jenkinshelper.bean.AccountStatus
 import com.lvlifeng.jenkinshelper.jenkins.Credentials.Companion.getPassword
 import com.offbytwo.jenkins.JenkinsServer
 import com.offbytwo.jenkins.client.JenkinsHttpClient
+import lombok.Getter
+import lombok.Setter
 import org.apache.commons.lang3.StringUtils
 import java.net.URI
 import java.net.URISyntaxException
@@ -15,24 +17,13 @@ import java.net.URISyntaxException
  * @author Lv Lifeng
  * @date 2022-05-08 10:27
  */
+@Getter
+@Setter
 class Jenkins constructor() {
 
     var nickName: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
-
     var apiUrl: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
     var userName: String? = null
-        get() = field
-        set(value) {
-            field = value
-        }
 
     constructor(nickName: String?, apiUrl: String?, userName: String?) : this() {
         this.nickName = nickName

@@ -14,6 +14,8 @@ plugins {
     id("org.jetbrains.changelog") version "1.3.1"
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
+
+    id("io.freefair.lombok") version "6.4.3"
 }
 
 group = properties("pluginGroup")
@@ -39,6 +41,10 @@ dependencies {
     implementation("org.slf4j:slf4j-log4j12:1.7.5")
 //    implementation("io.github.cdancy:jenkins-rest:1.0.0")
     implementation("org.dom4j:dom4j:2.1.1")
+    implementation("com.github.cliftonlabs:json-simple:4.0.1")
+    {
+        exclude("junit")
+    }
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
