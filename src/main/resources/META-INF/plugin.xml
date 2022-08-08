@@ -2,7 +2,7 @@
 <idea-plugin require-restart="false">
     <id>com.lvlifeng.jenkinshelper</id>
     <name>JenkinsHelper</name>
-    <vendor url="https://github.com/Lv-Lifeng">Lv Lifeng</vendor>
+    <vendor url="https://github.com/Lifeng-Lv">Lifeng Lv</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 

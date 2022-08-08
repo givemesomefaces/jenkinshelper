@@ -3,6 +3,10 @@
 # JenkinsHelper Changelog
 
 ## [Unreleased]
+## [1.0.2]
+### Added
+- Nothing.
+
 
 ## [1.0.0]
 ### Added
