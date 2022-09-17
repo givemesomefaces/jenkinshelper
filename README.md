@@ -1,8 +1,8 @@
 # JenkinsHelper
 
-![Build](https://github.com/Lv-lifeng/JenkinsHelper/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/19155)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/19155)
+<!--- ![Build](https://github.com/Lv-lifeng/JenkinsHelper/workflows/Build/badge.svg) --->
+[![Version](https://img.shields.io/jetbrains/plugin/v/19155.svg)](https://plugins.jetbrains.com/plugin/19155)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/19155.svg)](https://plugins.jetbrains.com/plugin/19155)
 
 <!-- Plugin description -->
 ### Supports selecting multiple jobs at once to operate for jenkins 
