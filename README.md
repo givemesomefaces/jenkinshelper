@@ -16,7 +16,7 @@ The JenkinsHelper window is at the bottom of the ide. it support select multiple
   * update value of string params
   * add new string param
 * error log
-  * filter error log 
+  * filter error log
 
 ![O6iPjU.gif](https://s1.ax1x.com/2022/05/14/O6iPjU.gif)
 <!-- Plugin description end -->
@@ -36,9 +36,3 @@ The JenkinsHelper window is at the bottom of the ide. it support select multiple
 
   Download the [latest release](https://github.com/Lv-lifeng/JenkinsHelper/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
-
-
----
-Plugin based on the [IntelliJ Platform Plugin Template][template].
-
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
