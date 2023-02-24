@@ -6,7 +6,7 @@
 ![](https://komarev.com/ghpvc/?username=itisokey-jenkinshelper&color=orange&style=flat&label=pv)
 
 <!-- Plugin description -->
-### JenkinsHelper is a JetBrains IDE plugin, such as IntelliJ IDEA, that allows for Jenkins operations on multiple jobs simultaneously.
+### JenkinsHelper is a plugin for JetBrains IDEs, such as IntelliJ IDEA, that enables Jenkins operations on multiple jobs simultaneously.
 The JenkinsHelper window is at the bottom of the IDE, it supports selecting multiple jobs to operate at the same time.
 * build   
   * build with params
