@@ -3,6 +3,7 @@
 <!--- ![Build](https://github.com/Lv-lifeng/JenkinsHelper/workflows/Build/badge.svg) --->
 [![Version](https://img.shields.io/jetbrains/plugin/v/19155.svg)](https://plugins.jetbrains.com/plugin/19155)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/19155.svg)](https://plugins.jetbrains.com/plugin/19155)
+![](https://komarev.com/ghpvc/?username=itisokey-jenkinshelper&color=orange&style=flat&label=pv)
 
 <!-- Plugin description -->
 ### JenkinsHelper is a JetBrains IDE plugin, such as IntelliJ IDEA, that allows for Jenkins operations on multiple jobs simultaneously.
