@@ -5,8 +5,8 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/19155.svg)](https://plugins.jetbrains.com/plugin/19155)
 
 <!-- Plugin description -->
-### Supports selecting multiple jobs at once to operate for jenkins 
-The JenkinsHelper window is at the bottom of the ide. it support select multiple jobs to operate.
+### JenkinsHelper is a JetBrains IDE plugin, such as IntelliJ IDEA, that allows for Jenkins operations on multiple jobs simultaneously.
+The JenkinsHelper window is at the bottom of the IDE, it supports selecting multiple jobs to operate at the same time.
 * build   
   * build with params
   * circular build if last build was failed 
